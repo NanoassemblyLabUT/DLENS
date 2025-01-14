@@ -1,0 +1,1 @@
+Lets update this with guidelines all the way from installing python and dependencies (maybe with a couple systems - anaconda (spyder, jupiter), python launcher, etc) to how to use the software and gui. We should add descriptions of every model type we have included as well. Focused descriptions on any terminology should be here to. 
