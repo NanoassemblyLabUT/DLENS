@@ -13,72 +13,54 @@ from datetime import datetime
 
 
 class MainApplication(tk.Frame):
-    
-    
+    # Constructor that initializes the app and sets up the interface
     def __init__(self, parent) -> None:
-        
         self.parent = parent
         self._Setup()
-        
         return None
-    
-    
+
+    # Sets up the necessary components for the app
     def _Setup(self) -> None:
-        
         self._SetNumbers()
         self._SetFolders()
         self._SetUI()
-        
         return None
     
-    
+    # Configures the UI elements
     def _SetUI(self) -> None:
-        
         parent = self.parent
-        
         tk.Frame.__init__(self, parent)
-        
         parent.title('Autosubtraction')
         parent.geometry("1080x400")
         parent.protocol("WM_DELETE_WINDOW", parent.quit())
-        
-        self.dy = 16
-        
+        self.dy = 16    # Y-offset for placing UI elements
         self._SetButtons()
         self._SetPlots()
-        
         return None
     
-    
+    # Initializes numeric arrays and default variables
     def _SetNumbers(self) -> None:
-        
         q_log_arr = np.arange(-2.0, 0.0, np.true_divide(1, 128) - 2*np.log10(2))
         q_arr = np.power(10, q_log_arr)
-        
         self.q_arr = q_arr
         self.q_crit = 0.2
-        
         self.loaded_0 = False
         self.loaded_1 = False
         self.loaded_2 = False
-
         return None
     
-    
+    # Sets up the folder structure for file management
     def _SetFolders(self) -> None:
-        
         cwd = os.getcwd()
         username = os.getlogin()
         current = datetime.now()
         current = current.strftime('%Y%m%d')
-
         base_path = os.path.join(cwd, 'Subtraction')
-        
         if not os.path.exists(base_path):
             os.makedirs(base_path)
-        
+
+        # Creates unique working directory using a counter
         count = 0
-        
         while True:
             temp = f'{username}_{current}_{count:02d}'
             if temp not in os.listdir(base_path):
@@ -91,19 +73,21 @@ class MainApplication(tk.Frame):
         back_dir = os.path.join(working_dir, 'Background')
         sub_dir = os.path.join(working_dir, 'Subtracted')
         img_dir= os.path.join(working_dir, 'Images')
-        
+
+        # Creates log file for records
         log_end = 'csv'
         log_file = f'Record.{log_end}'
         log_path = os.path.join(working_dir, log_file)
-            
+
+        # Creates directories
         os.makedirs(working_dir)
         os.makedirs(raw_dir)
         os.makedirs(back_dir)
         os.makedirs(sub_dir)
-        
         with open(log_path, "a") as f:
             f.write("Raw,Background,Subtracted,Scale factor,Minimum q value,Comments\n")
-        
+
+        # Saves directory paths to instance variables
         self.cwd = cwd
         self.base_path = base_path
         self.working_dir = working_dir
@@ -112,72 +96,62 @@ class MainApplication(tk.Frame):
         self.sub_dir = sub_dir
         self.img_dir = img_dir
         self.log_path = log_path
-        
         return None
     
-    
+    # Sets up buttons for user interaction
     def _SetButtons(self) -> None:
         
         parent = self.parent
         dy = self.dy
         reg = parent.register(self._Callback)
-        
         height = 3*dy - 2
         width = 320
-        
+
+        # Creates and places buttons with appropriate commands
         button_single = Button(parent, text="Single", command=self._Single)
         button_single.place(height=height, width=width/2 - 2, x=20, y=1*dy)
         button_single.config(state=tk.NORMAL)
-        
         button_multiple = Button(parent, text="Multiple", command=self._Multiple)
         button_multiple.place(height=height, width=width/2 - 2, x=182, y=1*dy)
         button_multiple.config(state=tk.NORMAL)
-        
         button_back = Button(parent, text="Buffer", command=self._Load_1)
         button_back.place(height=height, width=width, x=20, y=4*dy)
         button_back.config(state=tk.NORMAL)
-        
         button_sub = Button(parent, text="Subtract", command=self._Subtract)
         button_sub.place(height=height, width=width, x=20, y=7*dy)
-        button_sub.config(state=tk.DISABLED)
-        
+        button_sub.config(state=tk.DISABLED)    # Initially disabled
+
+        # Navigation and utility buttons (all initially disabled)
         button_backward = Button(parent, text="<", command=self._Backward)
         button_backward.place(height=height, width=width/2 - 2, x=20, y=10*dy)
         button_backward.config(state=tk.DISABLED)
-        
         button_forward = Button(parent, text=">", command=self._Forward)
         button_forward.place(height=height, width=width/2 - 2, x=182, y=10*dy)
         button_forward.config(state=tk.DISABLED)
-        
         button_clear = Button(parent, text="Clear", command=self._Clear)
         button_clear.place(height=height, width=width/2 - 2, x=20, y=13*dy)
         button_clear.config(state=tk.DISABLED)
-        
         button_export = Button(parent, text="Export", command=self._Export)
         button_export.place(height=height, width=width/2 - 2, x=182, y=13*dy)
         button_export.config(state=tk.DISABLED)
-        
         button_cutoff = Button(parent, text="Cutoff", command=self._Cutoff)
         button_cutoff.place(height=height, width=120, x=20, y=16*dy)
-        
+
+        # Entry fields for q value and comments
         var_q = StringVar()
-        
         entry_q = Entry(parent, textvariable=var_q)
         entry_q.place(height=height, width=100, x=140, y=16*dy)
         entry_q.config(validate="key", validatecommand=(reg, '%P'))
         entry_q.insert(0, f'{self.q_crit}')
-        
         label_count = Label(parent, text='NA')
         label_count.place(height=height, width=100, x=240, y=16*dy)
-        
         label_comment = Label(parent, text='Comments')
         label_comment.place(height=30, width=width, x=20, y=19*dy)
-        
         var_comment = StringVar()
-        
         entry_comment = Entry(parent, textvariable=var_comment)
         entry_comment.place(height=height, width=width, x=20, y=21*dy)
-        
+
+        # Saves widgets as instance variables
         self.button_single = button_single
         self.button_multiple = button_multiple
         self.button_back = button_back
@@ -186,55 +160,43 @@ class MainApplication(tk.Frame):
         self.button_backward = button_backward
         self.button_clear = button_clear
         self.button_export = button_export
-        
         self.var_q = var_q
         self.var_comment = var_comment
-        
         self.label_count = label_count
-        
         return None
     
-    
+    # Creates plots for data visualization
     def _SetPlots(self) -> None:
-        
         parent = self.parent
-        
         figure_0 = Figure(figsize=(4, 4), dpi=64)
-        
         plot_0 = figure_0.add_subplot(1, 1, 1)
         plot_0.set_title("Raw")
         plot_0.set_xlabel(r'q ($\AA^{-1}$)')
         plot_0.set_ylabel('Scattering Intensity')
         plot_0.set_xscale('log')
         plot_0.set_yscale('log')
-        
         canvas_0 = FigureCanvasTkAgg(figure_0, parent)
         canvas_0.get_tk_widget().place(height=360, width=360, x=360, y=20)
         
         figure_1 = Figure(figsize=(4, 4), dpi=64)
-        
         plot_1 = figure_1.add_subplot(1, 1, 1)
         plot_1.set_title("Subtracted")
         plot_1.set_xlabel(r'q ($\AA^{-1}$)')
         plot_1.set_ylabel('Scattering Intensity')
         plot_1.set_xscale('log')
         plot_1.set_yscale('log')
-
         canvas_1 = FigureCanvasTkAgg(figure_1, parent)
         canvas_1.get_tk_widget().place(height=360, width=360, x=720, y=20)
         
         self.figure_0 = figure_0
         self.figure_1 = figure_1
-        
         self.plot_0 = plot_0
         self.plot_1 = plot_1
-        
         self.canvas_0 = canvas_0
         self.canvas_1 = canvas_1
-        
         return None
     
-    
+    # Validation callback for entry fields
     def _Callback(self, input_: str, *args, **kwargs) -> bool:
         try:
             if input_ == '':
@@ -244,39 +206,32 @@ class MainApplication(tk.Frame):
             return False
         return True
     
-    
+    # Clears data and resets UI elements
     def _Clear(self) -> None:
-        
         self._ClearButtons()
         self._ClearVariables()
         self._ClearFile()
-        
         return None
     
-    
+    # Resets button states
     def _ClearButtons(self) -> None:
-        
         self.button_single.config(text='Single')
         self.button_multiple.config(text='Multiple')
         self.button_back.config(text='Buffer')
         self.button_sub.config(state=tk.DISABLED)
         self.button_clear.config(state=tk.DISABLED)
         self.button_export.config(state=tk.DISABLED)
-        
         return None
     
-    
+    # Resets loaded flags
     def _ClearVariables(self) -> None:
-        
         self.loaded_0 = False
         self.loaded_1 = False
         self.loaded_2 = False
-        
         return None
     
-    
+    # Clears plots and resets titles
     def _ClearFile(self) -> None:
-        
         self.plot_0.clear()
         self.plot_0.set_title("Raw")
         self.plot_0.set_xlabel(r'q ($\AA^{-1}$)')
@@ -284,9 +239,9 @@ class MainApplication(tk.Frame):
         self.plot_0.set_xscale('log')
         self.plot_0.set_yscale('log')
         self.plot_0.grid()
-        
+
         self.canvas_0.draw()
-        
+
         self.plot_1.clear()
         self.plot_1.set_title("Subtracted")
         self.plot_1.set_xlabel(r'q ($\AA^{-1}$)')
@@ -299,7 +254,7 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Saves data to files and exports plots
     def _Export(self) -> None:
         
         raw_dir = self.raw_dir
@@ -310,32 +265,32 @@ class MainApplication(tk.Frame):
         
         file_0 = self.file_0
         file_1 = self.file_1
-        
+
+        # Defines target paths for raw and back files
         target_0 = os.path.join(raw_dir, os.path.basename(file_0))
         target_1 = os.path.join(back_dir, os.path.basename(file_1))
-        
-        name = os.path.basename(file_0)
-        name = name.split('.')[0]
-        
+
+        # Extracts file name without extension for output
+        name = os.path.basename(file_0).split('.')[0]
         target_2 = os.path.join(sub_dir, f'{name}.csv')
-        
+
+        # Copies files to specified directories
         shutil.copy(file_0, target_0)
         shutil.copy(file_1, target_1)
-        
+
+        # Stacks and saves numerical data into a CSV file
         arr = np.vstack((self.qs_2, self.Is_2, self.ss_2)).T
-        
         np.savetxt(target_2, arr, delimiter=",")
-        
+
+        # Appends export information to a log file
         comment = self.var_comment.get()
-        
         with open(log_path, "a") as f:
             f.write(f"{target_0},{target_1},{target_2},{self.alpha},{self.q_crit},{comment}\n")
-        
+
+        # Saves plots as images
         figure_0 = self.figure_0
         figure_1 = self.figure_1
-        
         img_dir = self.img_dir
-        
         img_path_0 = os.path.join(img_dir, f'{name}_raw.csv')
         img_path_1 = os.path.join(img_dir, f'{name}_sub.csv')
         
@@ -344,20 +299,16 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Loads a file and prepares it for processing
     def _LoadFile(self) -> None:
-                
         root = self.parent
-        
         root.path = filedialog.askopenfilename(
             initialdir=os.getcwd(), 
             title="Select a File"
         )
-        
         filename = root.path
-        
+
         if filename:
-            
             if self.working_index == 0:
                 self.label_count.config(text='NA')
                 self.button_forward.config(state=tk.DISABLED)
@@ -365,18 +316,16 @@ class MainApplication(tk.Frame):
                 self.single = True
             
             filenameshort = os.path.basename(filename)
-            
             name_len = len(filenameshort)
             folder_name = filename[:-name_len]
             
             self.working_origin = folder_name
             self.working_file = filename
-
             self._PrepareFile()
         
         return None
     
-    
+    # Wrapper functions for loading specific files
     def _Load_0(self) -> None:
         
         self.working_index = 0
@@ -418,17 +367,18 @@ class MainApplication(tk.Frame):
         
         return
     
-    
+    # Handles navigation between files
     def _Move(self, forward=bool) -> None:
-        
         self.working_index = 0
         self.loaded_0 = True
-        
+
+        # Updates file navigation index
         if forward:
             self.count = min(self.length - 1, self.count + 1)
         else:
             self.count = max(0, self.count - 1)
-                    
+
+        # Updates button states and labels based on position
         if self.count == self.length - 1:
             self.button_forward.config(state=tk.DISABLED)
             self.button_backward.config(state=tk.NORMAL)
@@ -440,7 +390,8 @@ class MainApplication(tk.Frame):
             self.button_backward.config(state=tk.NORMAL)
         
         self.label_count.config(text=f'{self.count + 1}/{self.length}')
-        
+
+        # Updates working file information
         filename = self.filenames[self.count]
         filenameshort = os.path.basename(filename)
         
@@ -454,17 +405,17 @@ class MainApplication(tk.Frame):
 
         return None
     
-    
+    # Navigates forward in the file list
     def _Forward(self) -> None:
         self._Move(forward=True)
         return None
     
-    
+    # Navigates backward in the file list
     def _Backward(self) -> None:
         self._Move(forward=False)
         return None
     
-    
+    # Prepares a file for processing by updating its data
     def _PrepareFile(self) -> None:
         
         self.get_qI()
@@ -474,9 +425,8 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Updates class variables with the current file's data
     def _UpdateData(self) -> None:
-                
         if self.working_index == 0:
             self.qs_0 = self.working_qs
             self.Is_0 = self.working_Is
@@ -491,10 +441,9 @@ class MainApplication(tk.Frame):
             self.file_1 = self.working_file
         else:
             pass
-        
         return None
     
-    
+    # Updates button states based on file load status
     def _UpdateButton(self) -> None:
                 
         if self.working_index == 0:
@@ -524,7 +473,7 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Updates the first plot with loaded data
     def _UpdatePlot_0(self) -> None:
         
         if self.loaded_0 and not self.loaded_1:
@@ -582,7 +531,7 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Perform background subtraction and update the second plot
     def _Subtract(self) -> None:
         
         self._AutoSubtract()
@@ -590,7 +539,7 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Automatically compute the subtraction factor and perform subtraction
     def _AutoSubtract(self) -> None:
         
         q_crit = self.var_q.get()
@@ -614,9 +563,8 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Update the second plot with subtracted data
     def _UpdatePlot_1(self) -> None:
-        
         if self.loaded_2:
             self.plot_1.clear()
             self.plot_1.plot(self.qs_2, self.Is_2)
@@ -631,7 +579,7 @@ class MainApplication(tk.Frame):
         
         return None
     
-    
+    # Set q cutoff value and update plot
     def _Cutoff(self) -> None:
         
         q_crit = float(self.var_q.get())
@@ -646,54 +594,62 @@ class MainApplication(tk.Frame):
         
         return None
 
-    
+    # Reads scattering data from the working file and stores it in class attributes.
+    # Supports files with two or three columns (q, I, [s])
     def get_qI(self, *args, **kwargs) -> None:
-        
+        # Get the working file path and extract the short filename and file extension
         working_file = self.working_file
-        
         filenameshort = os.path.basename(working_file)
         end = filenameshort[-3:]
-        
+
+        # Update the button text if provided in kwargs
         if 'button' in kwargs:
             _button = kwargs['button']
             _button.configure(text=filenameshort)
-                    
+
+        # Initialize a temporary list to store file data
         temp = list()
-        
+
+        # Open the working file for reading
         with open(working_file, 'r') as f:
-            
+            # Skip lines until a line starts with a digit (indicating data)
             while f.readline()[0] not in "0123456789":
                 continue
-            
+
+            # Read and parse the file line by line
             while True:
                 line = f.readline()
-                
+                # Determine the delimiter based on the file extension
                 if line:
                     if end == 'csv':
                         num = len(line.split(','))
                     else:
                         num = len(line.split())
-                        
+
+                    # Handle data with two or three columns
                     if num == 2:
                         q, I = line.split()
                         temp.append((float(q), float(I)))
                     else:
                         q, I, s = line.split()
                         temp.append((float(q), float(I), float(s)))
-                
                 else:
                     break
-        
+
+        # Convert the temporary list to a numpy array for easier manipulation
         temp = np.array(temp)
-        
+
+        # Extract columns for q-values and intensity (I-values)
         qs = temp[:, 0]
         Is = temp[:, 1]
-                
+
+        # Compute error (ss) based on the number of columns in the data
         if temp.shape[1] == 2:
-            ss = np.sqrt(Is)
+            ss = np.sqrt(Is) # Assume error is the square root of intensity if not provided
         else:
             ss = temp[:, 2]
-                
+
+        # Store data into class attributes for further use
         self.working_qs = qs
         self.working_Is = Is  
         self.working_ss = ss
@@ -701,14 +657,19 @@ class MainApplication(tk.Frame):
         return None
 
 
+# Initializes and runs the main application loop
 def main(*args, **kwargs) -> int:
-    
+    # Create the main Tkinter application window
     root = tk.Tk()
+
+    #Initializes and packs the main application
     MainApplication(root).pack(side="top", fill="both", expand=True)
-    root.mainloop()   
+
+    # Starts the Tkinter event loop
+    root.mainloop()
     
     return 0
 
-
+# Runs the main function if this file is executed as a script
 if __name__ == '__main__':
     main()
