@@ -1,7 +1,7 @@
 import numpy as np
 
-from scipy.special import gammainc
-from scipy.stats import gamma
+from scipy.special import gammainc  # For the lower incomplete gamma function 
+from scipy.stats import gamma   # For working with the gamma distribution
 
 
 def SZ_CDF(x: np.ndarray, k: float) -> np.ndarray:
