@@ -38,6 +38,14 @@ class MainApplication(tk.Frame):
     
     def _Setting(self, *args, **kwargs) -> None:
         
+        """
+        1. Set the reference q-vector array.
+        2. Set the current working directory.
+        3. Set the base path.
+        4. Set the working directory and log.
+        5. Set the default values for the internal parameters.
+        """
+        
         # This is the standardized q values used for the inference.
         q_log_arr = np.arange(-2, 0, np.true_divide(1, 128))
         q_arr = np.power(10, q_log_arr - 2*np.log10(2))
@@ -93,10 +101,24 @@ class MainApplication(tk.Frame):
         self.working_dir = working_dir
         self.log_path = log_path
         
+        """
+        Parameter Descriptions:
+            - file_loaded: return True if a file is loaded.
+            - folder_loaded: return True if a folder is loaded.
+            - fitted: return True if a simulation is ran.
+            - started: return True if the user hit Start.
+            
+            - shape: a string value that describes the shape
+            - _class: an integer value corresponding to shape
+            - speed: how accurate the simulation is going to be
+            - rho: the point density for the simulation determined by speed
+            - count: the file count of the folder loaded
+        """
+        
         self.file_loaded = False
+        self.folder_loaded = False
         self.fitted = False
         self.started = False
-        self.folder_loaded = False
         
         self.shape = None
         self._class = None
@@ -714,6 +736,14 @@ class MainApplication(tk.Frame):
     
     def _Layout(self, *args, **kwargs) -> None:
         
+        """
+        1. Set the parent window.
+        2. Set the basic controls.
+        3. Set the outputs for the parameters.
+        4. Set the buttons for the parameters.
+        5. Set the plots.
+        """
+        
         parent = self.parent
         
         tk.Frame.__init__(self, parent)
@@ -738,30 +768,44 @@ class MainApplication(tk.Frame):
         
         model_dir = os.path.join(cwd, 'Models')
         
-        name_s_0 = "2024_11_18_sphere_CPNN_Radius_0.keras"
-        name_s_1 = "2024_11_18_sphere_CPNN_AspectRatio_0.keras"
-        name_s_2 = '2024_12_10_sphere_CPNN_PDI_0.keras'
-        name_c_0 = "2024_11_18_cylinder_CPNN_Radius_0.keras"
-        name_c_1 = "2024_11_18_cylinder_CPNN_AspectRatio_0.keras"
-        name_c_2 = '2024_12_10_cylinder_CPNN_PDI_0.keras'
-        name_qr = "2024_11_18_SCNN_qr_0.keras"
-        name_cl = "2024_11_17_SVM_C_0.pkl"
+        name_s_0 = "2025_01_21_sphere_CPNN_Radius_0.keras"
+        name_s_1 = "2025_01_21_sphere_CPNN_AspectRatio_0.keras"
+        name_s_2 = '2025_01_21_sphere_CPNN_PDI_0.keras'
+        name_s_3 = '2025_01_21_sphere_CPNN_GyrationRadius_0.keras'
+
+        name_c_0 = "2025_01_21_cylinder_CPNN_Radius_0.keras"
+        name_c_1 = "2025_01_21_cylinder_CPNN_AspectRatio_0.keras"
+        name_c_2 = '2025_01_21_cylinder_CPNN_PDI_0.keras'
+        name_c_3 = '2025_01_21_cylinder_CPNN_GyrationRadius_0.keras'
+
+        name_qr = "2025_01_26_SCNN_qr_0.keras"
+        
+        name_cl = "2025_01_26_SVM_C_0.pkl"
         
         path_s_0 = os.path.join(model_dir, name_s_0)
         path_s_1 = os.path.join(model_dir, name_s_1)
         path_s_2 = os.path.join(model_dir, name_s_2)
+        path_s_3 = os.path.join(model_dir, name_s_3)
+        
         path_c_0 = os.path.join(model_dir, name_c_0)
         path_c_1 = os.path.join(model_dir, name_c_1)
         path_c_2 = os.path.join(model_dir, name_c_2)
+        path_c_3 = os.path.join(model_dir, name_c_3)
+        
         path_qr = os.path.join(model_dir, name_qr)
+        
         path_cl = os.path.join(model_dir, name_cl)
         
         model_s_0 = tf.keras.models.load_model(path_s_0, compile=False)
         model_s_1 = tf.keras.models.load_model(path_s_1, compile=False)
         model_s_2 = tf.keras.models.load_model(path_s_2, compile=False)
+        model_s_3 = tf.keras.models.load_model(path_s_3, compile=False)
+        
         model_c_0 = tf.keras.models.load_model(path_c_0, compile=False)
         model_c_1 = tf.keras.models.load_model(path_c_1, compile=False)
         model_c_2 = tf.keras.models.load_model(path_c_2, compile=False)
+        model_c_3 = tf.keras.models.load_model(path_c_3, compile=False)
+        
         model_qr = tf.keras.models.load_model(path_qr, compile=False)
         
         with open(path_cl, 'rb') as f:
@@ -770,16 +814,25 @@ class MainApplication(tk.Frame):
         self.model_s_0 = model_s_0
         self.model_s_1 = model_s_1
         self.model_s_2 = model_s_2
+        self.model_s_3 = model_s_3
+
         self.model_c_0 = model_c_0
         self.model_c_1 = model_c_1
         self.model_c_2 = model_c_2
+        self.model_c_3 = model_c_3
+
         self.model_qr = model_qr
+        
         self.model_cl = model_cl
         
         return None
     
     
     def _Pop_Up_0(self, *args, **kwargs) -> None:
+        
+        """
+        Start the auto-subtraction window.
+        """
         
         self.pop = tk.Toplevel()
         self._Set_Sub_UI()
@@ -788,6 +841,13 @@ class MainApplication(tk.Frame):
     
     
     def _Set_Sub_UI(self, *args, **kwargs) -> None:
+        
+        """
+        1. Set the base parameters.
+        2. Set the working folders.
+        3. Set the buttons.
+        4. Set the plots.
+        """
         
         parent = self.pop
                         
@@ -798,9 +858,7 @@ class MainApplication(tk.Frame):
         self._Set_Sub_Folders()
         self._Set_Sub_Buttons()
         self._Set_Sub_Plots()
-        
-        print('Done')
-        
+               
         return None
     
     
@@ -809,9 +867,7 @@ class MainApplication(tk.Frame):
         parent = self.pop
         dy = self.dy
         reg = parent.register(self._Callback)
-        
-        print('Here')
-        
+                
         height = 3*dy - 2
         dx = 8
         width = 160
@@ -862,9 +918,7 @@ class MainApplication(tk.Frame):
         
         self.sub_var_q = var_q
         self.sub_var_comment = var_comment
-        
-        print('Hi')
-        
+                
         return None
     
     
@@ -979,6 +1033,12 @@ class MainApplication(tk.Frame):
     
     def _Sub_Clear(self) -> None:
         
+        """
+        1. Clear buttons.
+        2. Clear variables.
+        3. Clear file.
+        """
+        
         self._Sub_Clear_Buttons()
         self._Sub_Clear_Variables()
         self._Sub_Clear_File()
@@ -1033,12 +1093,93 @@ class MainApplication(tk.Frame):
     
     def _Sub_Use(self) -> None:
         
-        self.I_arr = 0
+        """
+        1. Check if the subtraction was performed.
+        2. Fetch the subtracted data.
+        3. Set the subtracted data to the working data.
+        4. Run the analysis on the working data.
+        5. Quit the sub-window.
+        """
+        
+        if self.sub_loaded_2:
+            
+            raw_origin = self.file_0
+            back_origin = self.file_1
+            log_path = self.log_path
+            
+            raw_dir = self.sub_raw_dir
+            back_dir = self.sub_back_dir
+            sub_dir = self.sub_sub_dir
+            
+            raw_short = os.path.basename(raw_origin)
+            back_short = os.path.basename(raw_origin)
+            sub_short = os.path.basename(raw_origin)
+            
+            raw_name, _ = raw_short.split('.')
+            back_name, _ = back_short.split('.')
+            sub_name, _ = sub_short.split('.')
+            
+            new_raw_name = raw_name + '.csv'
+            new_back_name = back_name + '.csv'
+            new_sub_name = sub_name + '_sub.scv'
+            
+            new_raw_path = os.path.join(raw_dir, new_raw_name)
+            new_back_path = os.path.join(back_dir, new_back_name)
+            new_sub_path = os.path.join(sub_dir, new_sub_name)
+            
+            alpha = self.alpha
+            q_crit = self.q_crit
+            comment = self.comment
+            
+            self._Clear()
+            self.button_simulate.config(state=tk.NORMAL)
+            
+            with open(log_path, "a") as f:
+                f.write(f"{raw_origin},{back_origin},{new_sub_path},{alpha},{q_crit},{comment}\n")
+            
+            Is_0 = self.Is_0
+            qs_0 = self.qs_0
+            Is_1 = self.Is_1
+            qs_1 = self.qs_1
+            qs_2 = self.qs_2
+            Is_2 = self.Is_2
+            
+            Is_2[Is_2 <= 0] = np.min(Is_2[Is_2 > 0])
+            
+            Is_2 = np.interp(self.q_arr, qs_2, Is_2)
+            Is_2 /= np.max(Is_2)
+            
+            self.I_arr = Is_2
+            
+            temp_0 = np.hstack((Is_0.reshape(-1, 1), qs_0.reshape(-1, 1)))
+            temp_1 = np.hstack((Is_1.reshape(-1, 1), qs_1.reshape(-1, 1)))
+            temp_2 = np.hstack((Is_2.reshape(-1, 1), self.q_arr.reshape(-1, 1)))
+            
+            np.savetxt(new_raw_path, temp_0, delimiter=",")
+            np.savetxt(new_back_path, temp_1, delimiter=",")
+            np.savetxt(new_sub_path, temp_2, delimiter=",")
+
+            self.file_loaded = True
+            self.folder_loaded = False
+            self.origin = sub_dir
+            self.file_path = new_sub_path
+                        
+            self._Draw_qI()
+            self._Classify()
+            self._Fit()    
+            
+            self.pop.destroy()
         
         return None
     
     
     def _Sub_Load_File(self) -> None:
+        
+        """
+        1. Get the file.
+        2. Get the file path.
+        3. Prepare the file.
+        """
                 
         parent = self.pop
         
@@ -1066,6 +1207,10 @@ class MainApplication(tk.Frame):
     
     def _Sub_Load_0(self) -> None:
         
+        """
+        Load the raw file.
+        """
+        
         self.working_index = 0
         self.sub_loaded_0 = True
         self._Sub_Load_File()
@@ -1075,6 +1220,10 @@ class MainApplication(tk.Frame):
     
     def _Sub_Load_1(self) -> None:
         
+        """
+        Load the background file.
+        """
+        
         self.working_index = 1
         self.sub_loaded_1 = True
         self._Sub_Load_File()
@@ -1083,6 +1232,13 @@ class MainApplication(tk.Frame):
     
     
     def _Sub_Prepare_File(self) -> None:
+        
+        """
+        1. Get the data from the working file.
+        2. Store the data into the corresponding variables.
+        3. Update the button labels.
+        4. Update the plot.
+        """
         
         self._Sub_get_qI()
         self._Sub_Update_Data()
@@ -1098,14 +1254,14 @@ class MainApplication(tk.Frame):
             self.qs_0 = self.working_qs
             self.Is_0 = self.working_Is
             self.ss_0 = self.working_ss
-            self.origin_0 = self.working_origin
-            self.file_0 = self.working_file
+            self.origin_0 = self.sub_working_origin
+            self.file_0 = self.sub_working_file
         elif self.working_index == 1:
             self.qs_1 = self.working_qs
             self.Is_1 = self.working_Is
             self.ss_1 = self.working_ss
-            self.origin_1 = self.working_origin
-            self.file_1 = self.working_file
+            self.origin_1 = self.sub_working_origin
+            self.file_1 = self.sub_working_file
         else:
             pass
         
@@ -1115,17 +1271,17 @@ class MainApplication(tk.Frame):
     def _Sub_Update_Button(self) -> None:
                 
         if self.working_index == 0:
-            self.sub_button_raw.config(text=os.path.basename(self.working_file))
+            self.sub_button_raw.config(text=os.path.basename(self.sub_working_file))
         elif self.working_index == 1:
-            self.sub_button_back.config(text=os.path.basename(self.working_file))
+            self.sub_button_back.config(text=os.path.basename(self.sub_working_file))
         else:
             pass
         
-        if self.loaded_0 and self.loaded_1:
+        if self.sub_loaded_0 and self.sub_loaded_1:
             self.sub_button_sub.config(state=tk.NORMAL)
             self.sub_button_clear.config(state=tk.NORMAL)
             self.sub_button_use.config(state=tk.NORMAL)
-        elif self.loaded_0 or self.loaded_1:
+        elif self.sub_loaded_0 or self.sub_loaded_1:
             self.sub_button_sub.config(state=tk.DISABLED)
             self.sub_button_clear.config(state=tk.NORMAL)
             self.sub_button_use.config(state=tk.DISABLED)
@@ -1197,6 +1353,11 @@ class MainApplication(tk.Frame):
     
     def _Sub_Subtract(self) -> None:
         
+        """
+        1. Perform auto-subtraction.
+        2. Update the plot.
+        """
+        
         self._Sub_Auto_Subtract()
         self._Sub_Update_Plot_1()
         
@@ -1205,7 +1366,18 @@ class MainApplication(tk.Frame):
     
     def _Sub_Auto_Subtract(self) -> None:
         
+        """
+        1. Check if both the raw and background files are loaded.
+        2. Get the critical q-value.
+        3. Cut off the useful values.
+        4. Perform least-square fit.
+        5. Scale the background and subtract from the raw data.
+        """
+        
         q_crit = float(self.sub_var_q.get())
+        self.q_crit = q_crit
+        
+        self.comment = self.sub_var_comment.get()
         
         if self.sub_loaded_0 and self.sub_loaded_1:
 
@@ -1260,7 +1432,7 @@ class MainApplication(tk.Frame):
     
     def _Sub_get_qI(self, *args, **kwargs) -> None:
         
-        working_file = self.working_file
+        working_file = self.sub_working_file
         
         filenameshort = os.path.basename(working_file)
         end = filenameshort[-3:]
@@ -2107,10 +2279,12 @@ class MainApplication(tk.Frame):
                 self.model_0 = self.model_s_0
                 self.model_1= self.model_s_1
                 self.model_2 = self.model_s_2
+                self.model_3 = self.model_s_3
             case 1:
                 self.model_0 = self.model_c_0
                 self.model_1= self.model_c_1
                 self.model_2 = self.model_c_2
+                self.model_3 = self.model_c_3
             case _:
                 pass
         
@@ -2140,14 +2314,18 @@ class MainApplication(tk.Frame):
         pred_0 = self.model_0.predict(X)
         pred_1 = self.model_1.predict(X)
         pred_2 = self.model_2.predict(X)
+        pred_3 = self.model_3.predict(X)
         
         m_0, s_0 = pred_0[0, 0], pred_0[0, 1]
         m_1, s_1 = pred_1[0, 0], pred_1[0, 1]
         m_2, s_2 = pred_2[0, 0], pred_2[0, 1]        
+        m_3 = pred_3[0, 0]      
                         
         self.m_0 = m_0
         self.m_1 = m_1
         self.m_2 = m_2
+        self.m_3 = m_3
+        
         self.s_0 = s_0
         self.s_1 = s_1
         self.s_2 = s_2
@@ -2172,15 +2350,7 @@ class MainApplication(tk.Frame):
                 self.STD_1 = 2*self.s_1
                 self.STD_2 = self.s_2/2
                 
-                a = -0.931_372_402_843_532_4
-                b = 0.554_837_200_488_491_8
-                c = 0.007_910_143_709_179_732
-                
-                corr = a*self.p_2**2 + b*self.p_2 + c + 1
-                
-                a = b = self.p_0
-                c = self.p_1*self.p_0
-                self.r_g_0 = sqrt((a**2 + b**2 + c**2)/5)/corr
+                self.r_g_0 = 256*self.m_3
                 self.Guinier_fit()
                 
             case 1:
@@ -2197,7 +2367,7 @@ class MainApplication(tk.Frame):
                 self.STD_1 = 16*self.s_1*self.p_0
                 self.STD_2 = self.s_2/2
                 
-                self.r_g_0 = sqrt(self.p_0**2/2 + self.p_1**2/12)
+                self.r_g_0 = 1024*self.m_3
                 self.Guinier_fit()
                 
             case _:
