@@ -978,6 +978,19 @@ class MainApplication(tk.Frame):
     
     
     def _Set_Sub_Folders(self, *args, **kwargs) -> None:
+
+        """
+        This function creates the necessary paths and files.
+        
+        CWD
+            - Subtraction (base_path)
+                - (working_dir)
+                    - Raw           (raw_dir)
+                    - Background    (back_dir)
+                    - Subtracted    (sub_dir)
+                    - Images        (img_dir)
+                    - (log_path)
+        """
         
         cwd = os.getcwd()
         username = os.getlogin()
@@ -1095,10 +1108,13 @@ class MainApplication(tk.Frame):
         
         """
         1. Check if the subtraction was performed.
-        2. Fetch the subtracted data.
-        3. Set the subtracted data to the working data.
-        4. Run the analysis on the working data.
-        5. Quit the sub-window.
+        2. Fetch the raw, background, and subtracted data.
+        3. Copy the raw and background data to the created folders.
+        4. Save the subtracted data to the created folder.
+        5. Clear the files.
+        6. Set the subtracted data to the working data.
+        7. Run the analysis on the working data.
+        8. Quit the sub-window.
         """
         
         if self.sub_loaded_2:
