@@ -2152,7 +2152,8 @@ class MainApplication(tk.Frame):
         self._Prepare()
         X = self.X
                 
-        self.qr = model_qr.predict(X)[0]*256
+        qr = model_qr.predict(X)[0]
+        self.qr = np.power(10, 3*qr)
         
         self.interpolate()
         Y = self.Y
@@ -2369,6 +2370,8 @@ class MainApplication(tk.Frame):
                 
                 self.r_g_0 = 1024*self.m_3
                 self.Guinier_fit()
+
+                self.p_1 = np.sqrt(12*(np.square(self.r_g_0) - np.square(self.p_0)/2))
                 
             case _:
                 pass
