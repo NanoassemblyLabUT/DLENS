@@ -5,15 +5,16 @@ import threading as th
 from math import ceil, sqrt
 
 from Schulz_Zimm import SZ_avg, SZ_PPF
-# Schulz-Zimm module handles mathematical operations related to particle size distributions
+# Schulz-Zimm module handles mathematical operations related to particle size distributions.
 
 class Spheroid:
+    
     """
-        Class representing a 3D spheroid scatterer.
-        This includes methods for generating scatterers and calculating their Debye scattering patterns.
-        """
+    Class representing a 3D spheroid scatterer.
+    This includes methods for generating scatterers and calculating their Debye scattering patterns.
+    """
 
-    # Initialie the Spheroid object with parameters
+    # Initialie the Spheroid object with parameters,
     def __init__(
         self, 
         R: float, 
@@ -27,41 +28,41 @@ class Spheroid:
         self.p = p
         self.rho = rho
 
-        # Calculate effective radius for the spheroid
+        # Calculate the effective radius for the spheroid.
         self.r_eff = (4/3)*((p + 1)/(p + 2))*R
 
-        # Calculate volume of the spheroid and determine the number of scatterers
+        # Calculate the volume of the spheroid and determine the number of scatterers.
         V = np.pi*(4/3)*epsilon*R**3
         self.V = V
         self.num = int(V*rho)   # Total number of scatterers
     
-    # Generate scatterer positions for the spheroid
+    # Generate scatterer positions for the spheroid.
     def generate_scatterers(self, n: int) -> np.ndarray:
         
         R = self.R
         epsilon = self.epsilon
         p = self.p
 
-        # Generate random positions within the spheroid using spherical coordinates
+        # Generate random positions within the spheroid using spherical coordinates.
         y = np.random.uniform(-1.0 + 1e-6, 1.0 - 1e-6, n).astype('f')
         rho_arr = R*np.power(np.random.rand(n).astype('f'), 1/(p + 1))
         theta_arr = np.arccos(epsilon*y/np.sqrt(1 - np.square(y)*(1 - epsilon**2)))
         phi_arr = 2*np.pi*np.random.rand(n).astype('f')
 
-        # Compute scatterer positions in Cartesian coordinates
+        # Compute scatterer positions in Cartesian coordinates.
         r_arr = epsilon*rho_arr*np.sqrt((epsilon**2 - 1)*np.square(np.sin(theta_arr)) + 1)
         x_arr = r_arr*np.sin(theta_arr)*np.cos(phi_arr)
         y_arr = r_arr*np.sin(theta_arr)*np.sin(phi_arr)
         z_arr = r_arr*np.cos(theta_arr)
 
-        # Center the scatterers around the origin
+        # Center the scatterers around the origin.
         x_arr = x_arr - np.mean(x_arr)
         y_arr = y_arr - np.mean(y_arr)
         z_arr = z_arr - np.mean(z_arr)
         
         return np.hstack((x_arr.reshape(-1, 1), y_arr.reshape(-1, 1), z_arr.reshape(-1, 1)))
     
-    # Compute the Debye scattering pattern for the spheroid
+    # Compute the Debye scattering pattern for the spheroid.
     def Debye_Scattering(
         self, 
         q_arr: np.ndarray, 
@@ -69,42 +70,42 @@ class Spheroid:
         div: int=128
     ) -> np.ndarray:
 
-        # Determine the number of attempts needed based on the population size
+        # Determine the number of attempts needed based on the population size.
         tries = ceil(ceil(self.num/pop)**2/2)
         shape = q_arr.shape
-        f_total = np.zeros(shape=shape, dtype='f')  # Initialize total scattering intensities
+        f_total = np.zeros(shape=shape, dtype='f')  # Initialize total scattering intensities.
 
         for i in range(tries):
-            # Generate scatterer positions
+            # Generate scatterer positions.
             scatterers = self.generate_scatterers(pop)
 
-            # Compute pairwise distances between scatterers
+            # Compute pairwise distances between scatterers.
             r_ij = np.zeros(shape=(pop, pop), dtype='f')
             for j in range(3):
                 r = scatterers[:, j].reshape(-1, 1)
                 r_ij += np.square(r - r.T)
 
-            # Determine distance bins and bin edges
+            # Determine distance bins and bin edges.
             max_ = np.max(r_ij)
             bins = np.square(np.linspace(start=0, stop=1, num=div + 1, dtype='f'))*max_
             inds = np.digitize(r_ij, bins)
             vals, count = np.unique(inds, return_counts=True)
 
-            # Map indices to corresponding distances
+            # Map indices to corresponding distances.
             vals = np.sqrt(max_)*(vals - 0.5)/div
 
-            # Compute scattering intensity for each q value
+            # Compute scattering intensity for each q value.
             f_q = np.zeros(shape=shape, dtype='f')
             for l, q in enumerate(q_arr):
                 qr = np.multiply(q, vals)
                 f_q[l] += np.sum(count*np.sin(qr)/qr)
 
-            # Normalize the scattering intensity
+            # Normalize the scattering intensity.
             f_q /= np.max(f_q)
-            f_q[f_q <= 0] = np.min(f_q[f_q > 0])    # Handle non-positive values
-            f_total += f_q  # Accumulate intensities
+            f_q[f_q <= 0] = np.min(f_q[f_q > 0])    # Handle non-positive values.
+            f_total += f_q  # Accumulate intensities.
                 
-        return f_total/tries    # Average the intensities over all attempts
+        return f_total/tries    # Average the intensities over all attempts.
     
 # Class representing a 3D cyclindrical scatterer.
 class Cylinder:
@@ -122,21 +123,21 @@ class Cylinder:
         self.p = p
         self.rho = rho
 
-        # Calculate effective radius for the cylinder
+        # Calculate the effective radius for the cylinder.
         self.r_eff = (3/2)*((p + 1)/(p + 2))*R
 
-        # Calculate volume of the cylinder and determine the number of scatterers
+        # Calculate the volume of the cylinder and determine the number of scatterers.
         V = np.pi*(R**2)*L
         self.V = V
         self.num = int(V*rho)   # Total number of scatterers
     
-    # Generate scatterer positions for the cylinder
+    # Generate scatterer positions for the cylinder.
     def generate_scatterers(self, n: int) -> np.ndarray:
         R = self.R
         L = self.L
         p = self.p
 
-        # Generate random positions within the cylinder using cylindrical coordiantes
+        # Generate random positions within the cylinder using cylindrical coordinates.
         rho_arr = R*np.power(np.random.rand(n).astype('f'), 1/(1 + p))
         theta_arr = 2*np.pi*np.random.rand(n).astype('f')
         x_arr = rho_arr*np.cos(theta_arr)
@@ -145,7 +146,7 @@ class Cylinder:
         
         return np.hstack((x_arr.reshape(-1, 1), y_arr.reshape(-1, 1), z_arr.reshape(-1, 1)))
     
-    # Calculates the Debye scattering intensity for the given array of scattering wave vectors
+    # Calculates the Debye scattering intensity for the given array of scattering wave vectors.
     def Debye_Scattering(
         self, 
         q_arr: np.ndarray, 
@@ -153,58 +154,58 @@ class Cylinder:
         div: int=128
     ) -> np.ndarray:
 
-        # Calculate the number of iterations for averaging scattering contributions
+        # Calculate the number of iterations for averaging scattering contributions.
         tries = ceil(ceil(self.num/pop)**2/2)
         shape = q_arr.shape
 
-        # Initialize total scattering intensity to zero
+        # Initialize total scattering intensity to zero.
         f_total = np.zeros(shape=shape, dtype='f')
 
-        # Loop over the number of tries to average the scattering results
+        # Loop over the number of tries to average the scattering results.
         for i in range(tries):
-            # Generate scatterers for the current batch
+            # Generate scatterers for the current batch.
             scatterers = self.generate_scatterers(pop)
 
-            # Initialize the pairwise distance matrix
+            # Initialize the pairwise distance matrix.
             r_ij = np.zeros(shape=(pop, pop), dtype='f')
 
-            # Compute squared pairwise distance for x, y, and z coordinates
+            # Compute squared pairwise distance for x, y, and z coordinates.
             for j in range(3):
                 r = scatterers[:, j].reshape(-1, 1)
                 r_ij += np.square(r - r.T)
 
-            # Find the maximum pairwise distance
+            # Find the maximum pairwise distance.
             max_ = np.max(r_ij)
 
-            # Divide distances into bins using square scaling
+            # Divide distances into bins using square scaling.
             bins = np.square(np.linspace(start=0, stop=1, num=div + 1, dtype='f'))*max_
             inds = np.digitize(r_ij, bins)
             vals, count = np.unique(inds, return_counts=True)
 
-            # Convert bin indices back to physical distances
+            # Convert bin indices back to physical distances.
             vals = np.sqrt(max_)*(vals - 0.5)/div
 
-            # Initialize the scattering intensity for this batch
+            # Initialize the scattering intensity for this batch.
             f_q = np.zeros(shape=shape, dtype='f')
 
-            # Calculate intensity for each scattering vector q
+            # Calculate intensity for each scattering vector q.
             for k, q in enumerate(q_arr):
                 qr = q*vals # q * r values
                 f_q[k] += np.sum(count*np.sin(qr)/qr)   # Debye formula
 
-            # Normalize and handle any zero values in the intensity
+            # Normalize and handle any zero values in the intensity.
             f_q /= np.max(f_q)
             f_q[f_q <= 0] = np.min(f_q[f_q > 0])
 
-            # Accumulate the batch scattering intensity
+            # Accumulate the batch scattering intensity.
             f_total += f_q
 
-        # Return the averaged scatterting intensity over all tries
+        # Return the averaged scattering intensity over all tries.
         return f_total/tries
 
 
 class Spheroid_Shell:
-    # Initializes a Spheroid_Shell object with given geometric and material properties
+    # Initializes a Spheroid_Shell object with given geometric and material properties.
     def __init__(
         self,
         R: float, 
@@ -230,7 +231,7 @@ class Spheroid_Shell:
         self.rho = rho
         self.coeffs = {0: 1, 1: rho_delta, 2: rho_delta, 3: rho_delta**2}
 
-        # Calculate volume and estimate the number of scatterers
+        # Calculate the volume and estimate the number of scatterers
         V = np.pi*(4/3)*epsilon*R**3
         self.V = V
         self.num = int(V*rho)
@@ -287,7 +288,7 @@ class Spheroid_Shell:
         else:
             return None
     
-    # Generate a set of scatterrers consisting of points in the core and shell of a structure
+    # Generate a set of scatterers consisting of points in the core and shell of a structure
     def generate_scatterers(self, n: int) -> np.ndarray:
         
         f_core = self.f_core    # Fraction of scatterrers belonging to the core
@@ -819,8 +820,8 @@ class Disperse_Spheroid_Shell:
         R: float, 
         epsilon: float, 
         PDI: float, 
-        rho_delta: float, 
         f_core: float, 
+        rho_delta: float, 
         L: float, 
         p: float, 
         q: float, 
@@ -828,14 +829,14 @@ class Disperse_Spheroid_Shell:
         accuracy: int=16
     ) -> None:
         """
-               Initialize the spheroid shell model with given parameters.
+               Initialize the spheroid shell model with the given parameters.
 
                Parameters:
                    R (float): Base radius of the spheroid.
                    epsilon (float): Eccentricity of the spheroid.
                    PDI (float): Polydispersity index.
-                   rho_delta (float): Density contrast.
                    f_core (float): Core fraction.
+                   rho_delta (float): Density contrast.
                    L (float): Length parameter.
                    p (float): Shape exponent.
                    q (float): Additional shape parameter.
@@ -857,7 +858,7 @@ class Disperse_Spheroid_Shell:
 
         self.rho = rho
 
-        # Compute volume of the spheroid
+        # Compute the volume of the spheroid
         V = np.pi*(4/3)*epsilon*R**3
         self.V = V
         self.num = int(V*rho)   # Estimate number of scatterers
@@ -893,7 +894,7 @@ class Disperse_Spheroid_Shell:
         pop: int=2048,  # Population size for simulation
         div: int=128    # Number of divisions for numerical integration
     ):
-        # Define the number of divisions based on accuracy parameter
+        # Define the number of divisions based on the accuracy parameter
         division = self.accuracy
 
         # Create a probability distribution for size polydispersity

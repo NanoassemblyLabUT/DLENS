@@ -555,9 +555,12 @@ class MainApplication(tk.Frame):
             
             alpha = sum_01/sum_11
             self.alpha = alpha
+
+            Is_2 = self.Is_0 - alpha*self.Is_1
+            Is_2[Is_2 <= 0] = np.min(Is_2[Is_2 > 0])
             
             self.qs_2 = self.qs_0
-            self.Is_2 = self.Is_0 - alpha*self.Is_1
+            self.Is_2 = Is_2
             self.ss_2 = np.sqrt(np.square(self.ss_0) + np.square(alpha*self.ss_1))
             self.loaded_2 = True
         
@@ -622,16 +625,16 @@ class MainApplication(tk.Frame):
                 # Determine the delimiter based on the file extension
                 if line:
                     if end == 'csv':
-                        num = len(line.split(','))
+                        splits = line.split(',')
                     else:
-                        num = len(line.split())
+                        splits = line.split()
 
                     # Handle data with two or three columns
-                    if num == 2:
-                        q, I = line.split()
+                    if len(splits) == 2:
+                        q, I = splits
                         temp.append((float(q), float(I)))
                     else:
-                        q, I, s = line.split()
+                        q, I, s = splits
                         temp.append((float(q), float(I), float(s)))
                 else:
                     break
