@@ -770,12 +770,12 @@ class MainApplication(tk.Frame):
         
         name_s_0 = "2025_01_21_sphere_CPNN_Radius_0.keras"
         name_s_1 = "2025_01_21_sphere_CPNN_AspectRatio_0.keras"
-        name_s_2 = '2025_01_21_sphere_CPNN_PDI_0.keras'
+        name_s_2 = '2025_03_09_sphere_CPNN_PDI_0.keras'
         name_s_3 = '2025_01_21_sphere_CPNN_GyrationRadius_0.keras'
 
         name_c_0 = "2025_01_21_cylinder_CPNN_Radius_0.keras"
         name_c_1 = "2025_01_21_cylinder_CPNN_AspectRatio_0.keras"
-        name_c_2 = '2025_01_21_cylinder_CPNN_PDI_0.keras'
+        name_c_2 = '2025_03_09_cylinder_CPNN_PDI_0.keras'
         name_c_3 = '2025_01_21_cylinder_CPNN_GyrationRadius_0.keras'
 
         name_qr = "2025_01_26_SCNN_qr_0.keras"
@@ -2404,7 +2404,7 @@ class MainApplication(tk.Frame):
             case 0:
                 self.p_0 = 256*self.m_0
                 self.p_1 = 2*self.m_1
-                self.p_2 = 10**(-self.m_2*4)/2
+                self.p_2 = np.square(self.m_2)
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2*self.p_0
@@ -2421,7 +2421,7 @@ class MainApplication(tk.Frame):
             case 1:
                 self.p_0 = 256*self.m_0
                 self.p_1 = 16*self.m_1*self.p_0
-                self.p_2 = 10**(-self.m_2*4)/2
+                self.p_2 = np.square(self.m_2)
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2*self.p_0
