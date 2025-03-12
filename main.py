@@ -1265,7 +1265,9 @@ class MainApplication(tk.Frame):
     
     
     def _Sub_Update_Data(self) -> None:
-                
+
+        # Assign the gathered data to the appropriate labels.
+        
         if self.working_index == 0:
             self.qs_0 = self.working_qs
             self.Is_0 = self.working_Is
@@ -1285,6 +1287,11 @@ class MainApplication(tk.Frame):
     
     
     def _Sub_Update_Button(self) -> None:
+
+        """
+        1. Check whether the raw or background data is loaded.
+        2. Update the buttons.
+        """
                 
         if self.working_index == 0:
             self.sub_button_raw.config(text=os.path.basename(self.sub_working_file))
@@ -2161,6 +2168,16 @@ class MainApplication(tk.Frame):
     
     
     def _Classify(self, *args, **kwargs) -> None:
+
+        """
+        1. Load the radius of gyration prediction and class prediction models.
+        2. Prepare the SAXS data.
+        3. Predict the radius of gyration.
+        4. Change the axis from q to qr.
+        5. Predict the class.
+        6. Display the class chosen.
+        7. Update the labels.
+        """
         
         model_qr = self.model_qr
         model_cl = self.model_cl
@@ -2290,6 +2307,15 @@ class MainApplication(tk.Frame):
     
     
     def _Fit(self, *args, **kwargs) -> None:
+
+        """
+        1. Check the class.
+        2. Assign the models.
+        3. Get the raw predictions from DL models.
+        4. Translate the raw predictions into actual values.
+        5. Display the prediction results.
+        6. Update the GUI.
+        """
                         
         match self._class:
             case 0:
@@ -2325,6 +2351,12 @@ class MainApplication(tk.Frame):
     
     
     def _GetPrediction(self, *args, **kwargs) -> None:
+
+        """
+        1. Load the prepared SAXS data.
+        2. Get Predictions.
+        3. Store the raw predictions.
+        """
         
         X = self.X
         
@@ -2351,6 +2383,22 @@ class MainApplication(tk.Frame):
 
     
     def _Translate(self, *args, **kwargs) -> None:
+
+        """
+        1. Check the class.
+        2. Translate the raw predictions using the appropriate methods.
+            p_0: core radius
+            p_1: aspect ratio or length
+            p_2: PDI
+            p_3: fraction of scatterers in the core
+            p_4: excess scattering length density ratio between corona and core
+            p_5: shell thickness
+            p_6: density factor for the core
+                - sphere: about 2.0
+                - cylinder: about 1.0
+            p_7: density factor the the shell
+                - Should be about 0.0
+        """
                 
         match self._class:
             case 0:
@@ -2592,6 +2640,14 @@ class MainApplication(tk.Frame):
         
     
     def _Simulate(self, *args, **kwargs) -> None:
+
+        """
+        1. Set the speed of the simulation.
+        2. Select the class.
+        3. Create a micelle instance.
+        4. Fetch the scattering simulation.
+        5. Calculate the deviation from the real data.
+        """
                 
         self.rho = 0.001/(1 + self.speed)
         
@@ -2622,6 +2678,9 @@ class MainApplication(tk.Frame):
     
     def _Error(self, *args, **kwargs) -> None:
         
+        # Calculate the mean logarithmic squared error.
+        # This focuses on the low-q region.
+        
         error = np.mean(np.square(np.log(self.I_arr + 1) - np.log(self.I_sim + 1)))
         self.error = error
         
@@ -2634,6 +2693,8 @@ class MainApplication(tk.Frame):
     
     
     def _Probability(self, *args, **kwargs) -> None:
+
+        # Create Gaussian distributions using the calculated parameters.
         
         match self._class:
             case 0:
@@ -2672,6 +2733,10 @@ class MainApplication(tk.Frame):
     
     
     def _Deviance_0(self, *args, **kwargs) -> None:
+
+        # How much the current parameter values deviate from the predicted mean.
+        # For spheroids.
+        # Should be zero initially.
         
         self.dev_0 = (self.p_0/256 - self.m_0)/self.s_0
         self.dev_1 = (self.p_1/2 - self.m_1)/self.s_1
@@ -2681,6 +2746,10 @@ class MainApplication(tk.Frame):
     
     
     def _Deviance_1(self, *args, **kwargs) -> None:
+
+        # How much the current parameter values deviate from the predicted mean.
+        # For cylinders.
+        # Should be zero initially.
         
         self.dev_0 = (self.p_0/256 - self.m_0)/self.s_0
         self.dev_1 = (self.p_1/(16*self.p_0) - self.m_1)/self.s_1
