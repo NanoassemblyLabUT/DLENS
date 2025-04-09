@@ -1,0 +1,10 @@
+2025_01_21_sphere_CPNN_Radius_0.keras
+2025_01_21_sphere_CPNN_AspectRatio_0.keras
+2025_01_21_sphere_CPNN_PDI_0.keras
+2025_01_21_sphere_CPNN_GyrationRadius_0.keras
+2025_01_21_cylinder_CPNN_Radius_0.keras
+2025_01_21_cylinder_CPNN_AspectRatio_0.keras
+2025_01_21_cylinder_CPNN_PDI_0.keras
+2025_01_21_cylinder_CPNN_GyrationRadius_0.keras
+2025_01_26_SCNN_qr_0.keras
+2025_01_26_SVM_C_0.pkl
