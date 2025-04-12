@@ -8,7 +8,7 @@ import pickle as pk
 
 from datetime import datetime
 
-from tkinter import Button, StringVar, filedialog, Entry, Label, OptionMenu
+from tkinter import Button, StringVar, filedialog, Entry, Label, OptionMenu, messagebox
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -22,11 +22,36 @@ The Debye module is a file that works alongside this file.
 """
 
 
+class ToolTip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip = None
+        self.widget.bind("<Enter>", self.show_tooltip)
+        self.widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event):
+        x, y, _, _ = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 25
+        self.tooltip = tk.Toplevel(self.widget)
+        self.tooltip.wm_overrideredirect(True)
+        self.tooltip.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(self.tooltip, text=self.text, background="lightyellow", relief="solid",
+                         borderwidth=1)
+        label.pack()
+
+    def hide_tooltip(self, event):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+
 class MainApplication(tk.Frame):
     
     
     def __init__(self, parent, *args, **kwargs):
-        
+
         self.parent = parent
         
         self._Setting()
@@ -34,8 +59,8 @@ class MainApplication(tk.Frame):
         self._LoadModels()
         
         return None
-    
-    
+
+
     def _Setting(self, *args, **kwargs) -> None:
         
         """
@@ -125,116 +150,130 @@ class MainApplication(tk.Frame):
         self.speed = 1
         self.rho = 0.001/self.speed
         self.count = -1
-                
+
         return None
-    
-    
+
+
     def _LayOperation(self, *args, **kwargs) -> None:
-        
+
         parent = self.parent
         dy = self.dy
-        
+
         button_folder = Button(parent, text="Load Folder", command=self._LoadFolder)
         button_folder.place(height=2*dy, width=128, x=16, y=1*dy)
-        
+        ToolTip(button_folder, "Click to load a folder")
+
         button_file = Button(parent, text="Load File", command=self._LoadFile)
         button_file.place(height=2*dy, width=128, x=16, y=3*dy)
-        
+        ToolTip(button_file, "Click to load a file")
+
         shapes = ["Spheroid", "Cylinder"]
         select_shapes = StringVar()
         select_shapes.set("Fitting Algorithm")
-        
+
         drop_methods = OptionMenu(parent, select_shapes, *shapes, command=self._Drop_Fit)
         drop_methods.config(width=20)
         drop_methods.place(height=30, width=128, x=16, y=5*dy)
-        drop_methods.config(state=tk.DISABLED)
-        
+        drop_methods.config(state=tk.DISABLED , bg="Light grey")
+
         button_clear = Button(parent, text="Clear", command=self._Clear)
         button_clear.place(height=30, width=128, x=16, y=7*dy)
-        button_clear.config(state=tk.DISABLED)
-        
+        button_clear.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_clear, "Click to clear the input fields")
+
         button_export = Button(parent, text="Export", command=self._Export)
         button_export.place(height=30, width=128, x=16, y=9*dy)
-        button_export.config(state=tk.DISABLED)
-        
+        button_export.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_export, "Click to export the data")
+
         button_simulate = Button(parent, text="Start", command=self._Simulate_as)
         button_simulate.place(height=30, width=128, x=16, y=11*dy)
-        button_simulate.config(state=tk.DISABLED)
+        button_simulate.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_simulate, "Click to start the simulation")
 
         button_visualize = Button(parent, text="Visualize", command=self._Visualize)
         button_visualize.place(height=30, width=128, x=16, y=13*dy)
-        button_visualize.config(state=tk.DISABLED)
-        
+        button_visualize.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_visualize, "Click to visualize the results")
+
         label_speed = Label(parent, text="Speed")
         label_speed.place(height=30, width=64, x=16, y=15*dy)
-        
+        ToolTip(label_speed, "Adjust the speed of the simulation")
+
         speeds = ["1", "2", "3", "4"]
         select_speeds = StringVar()
         select_speeds.set("1")
-        
+
         drop_speeds = OptionMenu(parent, select_speeds, *speeds, command=self._Drop_Speed)
         drop_speeds.config(width=20)
         drop_speeds.place(height=30, width=64, x=80, y=15*dy)
-        drop_speeds.config(state=tk.DISABLED)
-        
+        drop_speeds.config(state=tk.DISABLED, bg="Light grey")
+
         label_count = Label(parent, text="N/A")
         label_count.place(height=30, width=64, x=16, y=17*dy)
-        
+
         button_backward = Button(parent, text='<', command=self._Backward)
         button_backward.place(height=30, width=30, x=80, y=17*dy)
-        button_backward.config(state=tk.DISABLED)
-        
+        button_backward.config(state=tk.DISABLED, bg="Light grey")
+
         button_forward = Button(parent, text='>', command=self._Forward)
         button_forward.place(height=30, width=30, x=112, y=17*dy)
-        button_forward.config(state=tk.DISABLED)
-        
+        button_forward.config(state=tk.DISABLED, bg="Light grey")
+
         label_MSLE = Label(parent, text="mMSLE:")
         label_MSLE.place(height=30, width=128, x=144, y=17*dy)
-        
+        ToolTip(label_MSLE, "Displays the Mean Squared Logarithmic Error")
+
         var_MSLE = StringVar()
-                
+
         Entry_MSLE = Entry(parent, textvariable=var_MSLE)
         Entry_MSLE.place(height=30, width=96, x=272, y=17*dy)
-        Entry_MSLE.config(state=tk.DISABLED)
-        
+        Entry_MSLE.config(state=tk.DISABLED, bg="Light grey")
+
         label_comment = Label(parent, text="Comment:")
         label_comment.place(height=30, width=128, x=16, y=19*dy)
-        
+
         var_comment = StringVar()
-        
+
         entry_comment = Entry(parent, textvariable=var_comment)
         entry_comment.place(height=30, width=192, x=144, y=19*dy)
-        entry_comment.config(state=tk.NORMAL)
-        
+        entry_comment.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+
         label__class0 = Label(parent, text="Spheroid:")
         label__class0.place(height=30, width=64, x=336, y=19*dy)
-        
+        ToolTip(label__class0, "Enter the Spheroid value here")
+
         var__class0 = StringVar()
-        
+
         entry__class0 = Entry(parent, textvariable=var__class0)
         entry__class0.place(height=30, width=64, x=400, y=19*dy)
-        entry__class0.config(state=tk.DISABLED)
-        
+        entry__class0.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(entry__class0, "Spheroid value, disabled until ready")
+
         label__class1 = Label(parent, text="Cylinder:")
         label__class1.place(height=30, width=64, x=464, y=19*dy)
-        
+        ToolTip(label__class1, "Enter the Cylinder value here")
+
         var__class1 = StringVar()
-        
+
         entry__class1 = Entry(parent, textvariable=var__class1)
         entry__class1.place(height=30, width=64, x=528, y=19*dy)
-        entry__class1.config(state=tk.DISABLED)
-        
+        entry__class1.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(entry__class1, "Cylinder value, disabled until ready")
+
         button_autosub = Button(parent, text='Auto-subtraction', command=self._Autosubtraction)
         button_autosub.place(height=30, width=96, x=512, y=9*dy)
-        
+        ToolTip(button_autosub, "Click to perform auto-subtraction")
+
         button_help = Button(parent, text='Help', command=self._Help)
         button_help.place(height=30, width=96, x=512, y=11*dy)
-        
+        ToolTip(button_help, "Click to access help")
+
         self.drop_methods = drop_methods
         self.drop_speeds = drop_speeds
-        
+
         self.select_shapes = select_shapes
-        
+
         self.button_file = button_file
         self.button_folder = button_folder
         self.button_clear = button_clear
@@ -246,15 +285,26 @@ class MainApplication(tk.Frame):
 
         self.Entry_MSLE = Entry_MSLE
         self.entry_comment = entry_comment
-        
+
         self.label_count = label_count
-        
+
         self.entry__class0 = entry__class0
         self.entry__class1 = entry__class1
-        
+
+        self.var_status = StringVar()
+        self.var_status.set("Ready to load data.")  # Default status message
+
+        self.label_status = Label(parent, textvariable=self.var_status, anchor="w", fg="white",
+                                  bg="black")
+        self.label_status.pack(side=tk.BOTTOM, fill=tk.X)
         return None
-    
-    
+
+    def update_status(self, message: str) -> None:
+        self.var_status.set(message)
+        self.parent.update_idletasks()  # Refresh GUI immediately
+        return None
+
+
     def _LayParameters(self, *args, **kwargs) -> None:
         
         parent = self.parent
@@ -269,7 +319,7 @@ class MainApplication(tk.Frame):
 
         entry_0 = Entry(parent, textvariable=var_0)
         entry_0.place(height=30, width=96, x=272, y=1*dy)
-        entry_0.config(state=tk.DISABLED)
+        entry_0.config(state=tk.DISABLED, bg="Light grey")
         entry_0.config(validate="key", validatecommand=(reg, '%P'))
         
         label_aux0 = Label(parent, text='Å')
@@ -282,7 +332,7 @@ class MainApplication(tk.Frame):
         
         entry_1 = Entry(parent, textvariable=var_1)
         entry_1.place(height=30, width=96, x=272, y=3*dy)
-        entry_1.config(state=tk.DISABLED)
+        entry_1.config(state=tk.DISABLED, bg="Light grey")
         entry_1.config(validate="key", validatecommand=(reg, '%P'))
         
         label_aux1 = Label(parent, text='%', justify="left")
@@ -295,7 +345,7 @@ class MainApplication(tk.Frame):
         
         entry_2 = Entry(parent, textvariable=var_2)
         entry_2.place(height=30, width=96, x=272, y=5*dy)
-        entry_2.config(state=tk.DISABLED)
+        entry_2.config(state=tk.DISABLED, bg="Light grey")
         entry_2.config(validate="key", validatecommand=(reg, '%P'))
         
         label_3 = Label(parent, text="Core Fraction:")
@@ -305,7 +355,7 @@ class MainApplication(tk.Frame):
         
         entry_3 = Entry(parent, textvariable=var_3)
         entry_3.place(height=30, width=96, x=272, y=7*dy)
-        entry_3.config(state=tk.DISABLED)
+        entry_3.config(state=tk.DISABLED, bg="Light grey")
         entry_3.config(validate="key", validatecommand=(reg, '%P'))
         
         label_aux2 = Label(parent, text='%')
@@ -318,7 +368,7 @@ class MainApplication(tk.Frame):
         
         entry_4 = Entry(parent, textvariable=var_4)
         entry_4.place(height=30, width=96, x=272, y=9*dy)
-        entry_4.config(state=tk.DISABLED)
+        entry_4.config(state=tk.DISABLED, bg="Light grey")
         entry_4.config(validate="key", validatecommand=(reg, '%P'))
         
         label_aux3 = Label(parent, text='‰')
@@ -331,7 +381,7 @@ class MainApplication(tk.Frame):
         
         entry_5 = Entry(parent, textvariable=var_5)
         entry_5.place(height=30, width=96, x=272, y=11*dy)
-        entry_5.config(state=tk.DISABLED)
+        entry_5.config(state=tk.DISABLED, bg="Light grey")
         entry_5.config(validate="key", validatecommand=(reg, '%P'))
         
         label_aux4 = Label(parent, text='Å')
@@ -344,7 +394,7 @@ class MainApplication(tk.Frame):
         
         entry_6 = Entry(parent, textvariable=var_6)
         entry_6.place(height=30, width=96, x=272, y=13*dy)
-        entry_6.config(state=tk.DISABLED)
+        entry_6.config(state=tk.DISABLED, bg="Light grey")
         entry_6.config(validate="key", validatecommand=(reg, '%P'))
         
         label_7 = Label(parent, text="Corona Density:")
@@ -354,7 +404,7 @@ class MainApplication(tk.Frame):
         
         entry_7 = Entry(parent, textvariable=var_7)
         entry_7.place(height=30, width=96, x=272, y=15*dy)
-        entry_7.config(state=tk.DISABLED)
+        entry_7.config(state=tk.DISABLED, bg="Light grey")
         entry_7.config(validate="key", validatecommand=(reg, '%P'))
         
         label_8 = Label(parent, text=r'R_g (ML)')
@@ -364,7 +414,7 @@ class MainApplication(tk.Frame):
         
         entry_8 = Entry(parent, textvariable=var_8)
         entry_8.place(height=30, width=96, x=512, y=3*dy)
-        entry_8.config(state=tk.DISABLED)
+        entry_8.config(state=tk.DISABLED, bg="Light grey")
         entry_8.config(validate="key", validatecommand=(reg, '%P'))
         
         label_9 = Label(parent, text=r'R_g (GN)')
@@ -374,7 +424,7 @@ class MainApplication(tk.Frame):
         
         entry_9 = Entry(parent, textvariable=var_9)
         entry_9.place(height=30, width=96, x=512, y=7*dy)
-        entry_9.config(state=tk.DISABLED)
+        entry_9.config(state=tk.DISABLED, bg="Light grey")
         entry_9.config(validate="key", validatecommand=(reg, '%P'))
         
         self.entry_0 = entry_0
@@ -401,131 +451,131 @@ class MainApplication(tk.Frame):
         
         button_0_P_L = Button(parent, text='+', command=lambda: self._Change(0, 0))
         button_0_P_L.place(height=30, width=30, x=384, y=1*dy)
-        button_0_P_L.config(state=tk.DISABLED)
+        button_0_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_0_N_L = Button(parent, text='-', command=lambda: self._Change(0, 1))
         button_0_N_L.place(height=30, width=30, x=416, y=1*dy)
-        button_0_N_L.config(state=tk.DISABLED)
+        button_0_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_0_P_S = Button(parent, text='+', command=lambda: self._Change(0, 2))
         button_0_P_S.place(height=20, width=20, x=448, y=1*dy + 5)
-        button_0_P_S.config(state=tk.DISABLED)
+        button_0_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_0_N_S = Button(parent, text='-', command=lambda: self._Change(0, 3))
         button_0_N_S.place(height=20, width=20, x=480, y=1*dy + 5)
-        button_0_N_S.config(state=tk.DISABLED)
+        button_0_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_1_P_L = Button(parent, text='+', command=lambda: self._Change(1, 0))
         button_1_P_L.place(height=30, width=30, x=384, y=3*dy)
-        button_1_P_L.config(state=tk.DISABLED)
+        button_1_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_1_N_L = Button(parent, text='-', command=lambda: self._Change(1, 1))
         button_1_N_L.place(height=30, width=30, x=416, y=3*dy)
-        button_1_N_L.config(state=tk.DISABLED)
+        button_1_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_1_P_S = Button(parent, text='+', command=lambda: self._Change(1, 2))
         button_1_P_S.place(height=20, width=20, x=448, y=3*dy + 5)
-        button_1_P_S.config(state=tk.DISABLED)
+        button_1_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_1_N_S = Button(parent, text='-', command=lambda: self._Change(1, 3))
         button_1_N_S.place(height=20, width=20, x=480, y=3*dy + 5)
-        button_1_N_S.config(state=tk.DISABLED)
+        button_1_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_2_P_L = Button(parent, text='+', command=lambda: self._Change(2, 0))
         button_2_P_L.place(height=30, width=30, x=384, y=5*dy)
-        button_2_P_L.config(state=tk.DISABLED)
+        button_2_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_2_N_L = Button(parent, text='-', command=lambda: self._Change(2, 1))
         button_2_N_L.place(height=30, width=30, x=416, y=5*dy)
-        button_2_N_L.config(state=tk.DISABLED)
+        button_2_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_2_P_S = Button(parent, text='+', command=lambda: self._Change(2, 2))
         button_2_P_S.place(height=20, width=20, x=448, y=5*dy + 5)
-        button_2_P_S.config(state=tk.DISABLED)
+        button_2_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_2_N_S = Button(parent, text='-', command=lambda: self._Change(2, 3))
         button_2_N_S.place(height=20, width=20, x=480, y=5*dy + 5)
-        button_2_N_S.config(state=tk.DISABLED)
+        button_2_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_3_P_L = Button(parent, text='+', command=lambda: self._Change(3, 0))
         button_3_P_L.place(height=30, width=30, x=384, y=7*dy)
-        button_3_P_L.config(state=tk.DISABLED)
+        button_3_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_3_N_L = Button(parent, text='-', command=lambda: self._Change(3, 1))
         button_3_N_L.place(height=30, width=30, x=416, y=7*dy)
-        button_3_N_L.config(state=tk.DISABLED)
+        button_3_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_3_P_S = Button(parent, text='+', command=lambda: self._Change(3, 2))
         button_3_P_S.place(height=20, width=20, x=448, y=7*dy + 5)
-        button_3_P_S.config(state=tk.DISABLED)
+        button_3_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_3_N_S = Button(parent, text='-', command=lambda: self._Change(3, 3))
         button_3_N_S.place(height=20, width=20, x=480, y=7*dy + 5)
-        button_3_N_S.config(state=tk.DISABLED)
+        button_3_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_4_P_L = Button(parent, text='+', command=lambda: self._Change(4, 0))
         button_4_P_L.place(height=30, width=30, x=384, y=9*dy)
-        button_4_P_L.config(state=tk.DISABLED)
+        button_4_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_4_N_L = Button(parent, text='-', command=lambda: self._Change(4, 1))
         button_4_N_L.place(height=30, width=30, x=416, y=9*dy)
-        button_4_N_L.config(state=tk.DISABLED)
+        button_4_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_4_P_S = Button(parent, text='+', command=lambda: self._Change(4, 2))
         button_4_P_S.place(height=20, width=20, x=448, y=9*dy + 5)
-        button_4_P_S.config(state=tk.DISABLED)
+        button_4_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_4_N_S = Button(parent, text='-', command=lambda: self._Change(4, 3))
         button_4_N_S.place(height=20, width=20, x=480, y=9*dy + 5)
-        button_4_N_S.config(state=tk.DISABLED)
+        button_4_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_5_P_L = Button(parent, text='+', command=lambda: self._Change(5, 0))
         button_5_P_L.place(height=30, width=30, x=384, y=11*dy)
-        button_5_P_L.config(state=tk.DISABLED)
+        button_5_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_5_N_L = Button(parent, text='-', command=lambda: self._Change(5, 1))
         button_5_N_L.place(height=30, width=30, x=416, y=11*dy)
-        button_5_N_L.config(state=tk.DISABLED)
+        button_5_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_5_P_S = Button(parent, text='+', command=lambda: self._Change(5, 2))
         button_5_P_S.place(height=20, width=20, x=448, y=11*dy + 5)
-        button_5_P_S.config(state=tk.DISABLED)
+        button_5_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_5_N_S = Button(parent, text='-', command=lambda: self._Change(5, 3))
         button_5_N_S.place(height=20, width=20, x=480, y=11*dy + 5)
-        button_5_N_S.config(state=tk.DISABLED)
+        button_5_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_6_P_L = Button(parent, text='+', command=lambda: self._Change(6, 0))
         button_6_P_L.place(height=30, width=30, x=384, y=13*dy)
-        button_6_P_L.config(state=tk.DISABLED)
+        button_6_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_6_N_L = Button(parent, text='-', command=lambda: self._Change(6, 1))
         button_6_N_L.place(height=30, width=30, x=416, y=13*dy)
-        button_6_N_L.config(state=tk.DISABLED)
+        button_6_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_6_P_S = Button(parent, text='+', command=lambda: self._Change(6, 2))
         button_6_P_S.place(height=20, width=20, x=448, y=13*dy + 5)
-        button_6_P_S.config(state=tk.DISABLED)
+        button_6_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_6_N_S = Button(parent, text='-', command=lambda: self._Change(6, 3))
         button_6_N_S.place(height=20, width=20, x=480, y=13*dy + 5)
-        button_6_N_S.config(state=tk.DISABLED)
+        button_6_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_7_P_L = Button(parent, text='+', command=lambda: self._Change(7, 0))
         button_7_P_L.place(height=30, width=30, x=384, y=15*dy)
-        button_7_P_L.config(state=tk.DISABLED)
+        button_7_P_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_7_N_L = Button(parent, text='-', command=lambda: self._Change(7, 1))
         button_7_N_L.place(height=30, width=30, x=416, y=15*dy)
-        button_7_N_L.config(state=tk.DISABLED)
+        button_7_N_L.config(state=tk.DISABLED, bg="Light grey")
         
         button_7_P_S = Button(parent, text='+', command=lambda: self._Change(7, 2))
         button_7_P_S.place(height=20, width=20, x=448, y=15*dy + 5)
-        button_7_P_S.config(state=tk.DISABLED)
+        button_7_P_S.config(state=tk.DISABLED, bg="Light grey")
         
         button_7_N_S = Button(parent, text='-', command=lambda: self._Change(7, 3))
         button_7_N_S.place(height=20, width=20, x=480, y=15*dy + 5)
-        button_7_N_S.config(state=tk.DISABLED)
+        button_7_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         self.button_0_P_L = button_0_P_L
         self.button_0_N_L = button_0_N_L
@@ -599,7 +649,7 @@ class MainApplication(tk.Frame):
         
         entry_0_m = Entry(parent, textvariable=var_0_m)
         entry_0_m.place(height=30, width=64, x=80, y=41*dy)
-        entry_0_m.config(state=tk.DISABLED)
+        entry_0_m.config(state=tk.DISABLED, bg="Light grey")
         entry_0_m.config(validate="key", validatecommand=(reg, '%P'))
         
         label_0_s = Label(parent, text="STD (Å):")
@@ -609,7 +659,7 @@ class MainApplication(tk.Frame):
         
         entry_0_s = Entry(parent, textvariable=var_0_s)
         entry_0_s.place(height=30, width=64, x=208, y=41*dy)
-        entry_0_s.config(state=tk.DISABLED)
+        entry_0_s.config(state=tk.DISABLED, bg="Light grey")
         entry_0_s.config(validate="key", validatecommand=(reg, '%P'))
         
         label_0_d = Label(parent, text="Deviation:", justify="left")
@@ -619,7 +669,7 @@ class MainApplication(tk.Frame):
         
         entry_0_d = Entry(parent, textvariable=var_0_d)
         entry_0_d.place(height=30, width=64, x=336, y=41*dy)
-        entry_0_d.config(state=tk.DISABLED)
+        entry_0_d.config(state=tk.DISABLED, bg="Light grey")
         entry_0_d.config(validate="key", validatecommand=(reg, '%P'))
         
         figure_1 = Figure(figsize=(4, 3), dpi=64)
@@ -639,7 +689,7 @@ class MainApplication(tk.Frame):
         
         entry_1_m = Entry(parent, textvariable=var_1_m)
         entry_1_m.place(height=30, width=64, x=496, y=41*dy)
-        entry_1_m.config(state=tk.DISABLED)
+        entry_1_m.config(state=tk.DISABLED, bg="Light grey")
         entry_1_m.config(validate="key", validatecommand=(reg, '%P'))
         
         label_1_s = Label(parent, text="STD (%):")
@@ -649,7 +699,7 @@ class MainApplication(tk.Frame):
         
         entry_1_s = Entry(parent, textvariable=var_1_s)
         entry_1_s.place(height=30, width=64, x=624, y=41*dy)
-        entry_1_s.config(state=tk.DISABLED)
+        entry_1_s.config(state=tk.DISABLED, bg="Light grey")
         entry_1_s.config(validate="key", validatecommand=(reg, '%P'))
         
         label_1_d = Label(parent, text="Deviation:")
@@ -659,7 +709,7 @@ class MainApplication(tk.Frame):
         
         entry_1_d = Entry(parent, textvariable=var_1_d)
         entry_1_d.place(height=30, width=64, x=752, y=41*dy)
-        entry_1_d.config(state=tk.DISABLED)
+        entry_1_d.config(state=tk.DISABLED, bg="Light grey")
         entry_1_d.config(validate="key", validatecommand=(reg, '%P'))
         
         figure_2 = Figure(figsize=(4, 3), dpi=64)
@@ -680,7 +730,7 @@ class MainApplication(tk.Frame):
         
         entry_2_m = Entry(parent, textvariable=var_2_m)
         entry_2_m.place(height=30, width=64, x=928, y=41*dy)
-        entry_2_m.config(state=tk.DISABLED)
+        entry_2_m.config(state=tk.DISABLED, bg="Light grey")
         entry_2_m.config(validate="key", validatecommand=(reg, '%P'))
         
         label_2_s = Label(parent, text="STD:")
@@ -690,7 +740,7 @@ class MainApplication(tk.Frame):
         
         entry_2_s = Entry(parent, textvariable=var_2_s)
         entry_2_s.place(height=30, width=64, x=1056, y=41*dy)
-        entry_2_s.config(state=tk.DISABLED)
+        entry_2_s.config(state=tk.DISABLED, bg="Light grey")
         entry_2_s.config(validate="key", validatecommand=(reg, '%P'))
         
         label_2_d = Label(parent, text="Deviation:")
@@ -700,7 +750,7 @@ class MainApplication(tk.Frame):
         
         entry_2_d = Entry(parent, textvariable=var_2_d)
         entry_2_d.place(height=30, width=64, x=1184, y=41*dy)
-        entry_2_d.config(state=tk.DISABLED)
+        entry_2_d.config(state=tk.DISABLED, bg="Light grey")
         entry_2_d.config(validate="key", validatecommand=(reg, '%P'))
         
         self.entry_0_m = entry_0_m
@@ -858,7 +908,21 @@ class MainApplication(tk.Frame):
         self._Set_Sub_Folders()
         self._Set_Sub_Buttons()
         self._Set_Sub_Plots()
-               
+        self.status_var = tk.StringVar()
+        self.status_var.set("Waiting for input...")
+
+        status_frame = tk.Frame(parent, height=25, bg="white")
+        status_frame.pack(side="bottom", fill="x")
+
+        self.sub_status_var = tk.StringVar()
+        self.sub_status_var.set("Ready to load data.")
+
+        self.status_label = tk.Label(parent, text="Ready", anchor="w", relief=tk.SUNKEN, bg="white",
+                                     fg="black")
+        self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
+
+        self.status_label = self.status_label
+
         return None
     
     
@@ -872,29 +936,35 @@ class MainApplication(tk.Frame):
         dx = 8
         width = 160
         
-        button_raw = Button(parent, text="Raw", command=self._Sub_Load_0)
+        button_raw = Button(parent, text="Load Raw Data", command=self._Sub_Load_0)
         button_raw.place(height=height, width=width, x=dx, y=1*dy)
-        button_raw.config(state=tk.NORMAL)
+        button_raw.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        ToolTip(button_raw, "Load the raw data file for subtraction.")
         
-        button_back = Button(parent, text="Buffer", command=self._Sub_Load_1)
+        button_back = Button(parent, text="Load Buffer Data", command=self._Sub_Load_1)
         button_back.place(height=height, width=width, x=dx, y=4*dy)
-        button_back.config(state=tk.NORMAL)
-        
+        button_back.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        ToolTip(button_back, "Load the buffer data file for subtraction.")
+
         button_sub = Button(parent, text="Subtract", command=self._Sub_Subtract)
         button_sub.place(height=height, width=width, x=dx, y=7*dy)
-        button_sub.config(state=tk.DISABLED)
+        button_sub.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_sub, "Perform subtraction between raw and buffer data.")
 
         button_clear = Button(parent, text="Clear", command=self._Sub_Clear)
         button_clear.place(height=height, width=width, x=dx, y=10*dy)
-        button_clear.config(state=tk.DISABLED)
-        
+        button_clear.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_clear, "Clear all loaded data and reset settings.")
+
         button_use = Button(parent, text="Use", command=self._Sub_Use)
         button_use.place(height=height, width=width, x=dx, y=13*dy)
-        button_use.config(state=tk.DISABLED)
-        
-        button_cutoff = Button(parent, text="Cutoff", command=self._Sub_Cutoff)
+        button_use.config(state=tk.DISABLED, bg="Light grey")
+        ToolTip(button_use, "Use the subtracted data in D-Lens.")
+
+        button_cutoff = Button(parent, text="q-Cutoff", command=self._Sub_Cutoff)
         button_cutoff.place(height=height, width=width/2, x=dx, y=16*dy)
-        
+        ToolTip(button_cutoff, "Set the q-value cutoff for data subtraction.")
+
         var_q = StringVar()
         
         entry_q = Entry(parent, textvariable=var_q)
@@ -1045,17 +1115,21 @@ class MainApplication(tk.Frame):
     
     
     def _Sub_Clear(self) -> None:
-        
+        # Prevent accidental data loss
+        if messagebox.askyesno("Confirm", "Clear all current data?"):
+            self._Sub_Clear_Buttons()
+            self._Sub_Clear_Variables()
+            self._Sub_Clear_File()
         """
         1. Clear buttons.
         2. Clear variables.
         3. Clear file.
         """
-        
+        self.sub_status_var.set("Clearing loaded data...")
         self._Sub_Clear_Buttons()
         self._Sub_Clear_Variables()
         self._Sub_Clear_File()
-        
+        self.sub_status_var.set("Ready to load data.")
         return None
     
     
@@ -1063,9 +1137,9 @@ class MainApplication(tk.Frame):
         
         self.sub_button_raw.config(text='Raw')
         self.sub_button_back.config(text='Buffer')
-        self.sub_button_sub.config(state=tk.DISABLED)
-        self.sub_button_clear.config(state=tk.DISABLED)
-        self.sub_button_use.config(state=tk.DISABLED)
+        self.sub_button_sub.config(state=tk.DISABLED, bg="Light grey")
+        self.sub_button_clear.config(state=tk.DISABLED, bg="Light grey")
+        self.sub_button_use.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
@@ -1105,7 +1179,7 @@ class MainApplication(tk.Frame):
     
     
     def _Sub_Use(self) -> None:
-        
+        self.sub_status_var.set("Saving and applying subtracted data...")
         """
         1. Check if the subtraction was performed.
         2. Fetch the raw, background, and subtracted data.
@@ -1148,7 +1222,7 @@ class MainApplication(tk.Frame):
             comment = self.comment
             
             self._Clear()
-            self.button_simulate.config(state=tk.NORMAL)
+            self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
             
             with open(log_path, "a") as f:
                 f.write(f"{raw_origin},{back_origin},{new_sub_path},{alpha},{q_crit},{comment}\n")
@@ -1182,8 +1256,8 @@ class MainApplication(tk.Frame):
                         
             self._Draw_qI()
             self._Classify()
-            self._Fit()    
-            
+            self._Fit()
+            self.sub_status_var.set("Data applied. Ready.")
             self.pop.destroy()
         
         return None
@@ -1226,11 +1300,12 @@ class MainApplication(tk.Frame):
         """
         Load the raw file.
         """
-        
+        self.sub_status_var.set("Loading raw data...")
         self.working_index = 0
         self.sub_loaded_0 = True
         self._Sub_Load_File()
-        
+        self.sub_status_var.set("Raw data loaded.")
+
         return None
     
     
@@ -1239,11 +1314,12 @@ class MainApplication(tk.Frame):
         """
         Load the background file.
         """
-        
+        self.sub_status_var.set("Loading buffer data...")
         self.working_index = 1
         self.sub_loaded_1 = True
         self._Sub_Load_File()
-        
+        self.sub_status_var.set("Buffer data loaded.")
+
         return None
     
     
@@ -1301,17 +1377,17 @@ class MainApplication(tk.Frame):
             pass
         
         if self.sub_loaded_0 and self.sub_loaded_1:
-            self.sub_button_sub.config(state=tk.NORMAL)
-            self.sub_button_clear.config(state=tk.NORMAL)
-            self.sub_button_use.config(state=tk.NORMAL)
+            self.sub_button_sub.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.sub_button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.sub_button_use.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         elif self.sub_loaded_0 or self.sub_loaded_1:
-            self.sub_button_sub.config(state=tk.DISABLED)
-            self.sub_button_clear.config(state=tk.NORMAL)
-            self.sub_button_use.config(state=tk.DISABLED)
+            self.sub_button_sub.config(state=tk.DISABLED, bg="Light grey")
+            self.sub_button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.sub_button_use.config(state=tk.DISABLED, bg="Light grey")
         else:
-            self.sub_button_sub.config(state=tk.DISABLED)
-            self.sub_button_clear.config(state=tk.DISABLED)
-            self.sub_button_use.config(state=tk.DISABLED)
+            self.sub_button_sub.config(state=tk.DISABLED, bg="Light grey")
+            self.sub_button_clear.config(state=tk.DISABLED, bg="Light grey")
+            self.sub_button_use.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
@@ -1380,10 +1456,11 @@ class MainApplication(tk.Frame):
         1. Perform auto-subtraction.
         2. Update the plot.
         """
-        
+        self.sub_status_var.set("Performing subtraction...")
         self._Sub_Auto_Subtract()
         self._Sub_Update_Plot_1()
-        
+        self.sub_status_var.set("Subtraction complete.")
+
         return None
     
     
@@ -1565,123 +1642,123 @@ class MainApplication(tk.Frame):
     
     def _ClearEntries(self, *args, **kwargs) -> None:
         
-        self.entry_0_m.config(state=tk.NORMAL)
+        self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_0_m.delete(0, tk.END)
-        self.entry_0_m.config(state=tk.DISABLED)
+        self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_0_s.config(state=tk.NORMAL)
+        self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_0_s.delete(0, tk.END)
-        self.entry_0_s.config(state=tk.DISABLED)
+        self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_0_d.config(state=tk.NORMAL)
+        self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_0_d.delete(0, tk.END)
-        self.entry_0_d.config(state=tk.DISABLED)
+        self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_1_m.config(state=tk.NORMAL)
+        self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_1_m.delete(0, tk.END)
-        self.entry_1_m.config(state=tk.DISABLED)
+        self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_1_s.config(state=tk.NORMAL)
+        self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_1_s.delete(0, tk.END)
-        self.entry_1_s.config(state=tk.DISABLED)
+        self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_1_d.config(state=tk.NORMAL)
+        self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_1_d.delete(0, tk.END)
-        self.entry_1_d.config(state=tk.DISABLED)
+        self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_2_m.config(state=tk.NORMAL)
+        self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_2_m.delete(0, tk.END)
-        self.entry_2_m.config(state=tk.DISABLED)
+        self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_2_s.config(state=tk.NORMAL)
+        self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_2_s.delete(0, tk.END)
-        self.entry_2_s.config(state=tk.DISABLED)
+        self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_2_d.config(state=tk.NORMAL)
+        self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_2_d.delete(0, tk.END)
-        self.entry_2_d.config(state=tk.DISABLED)
+        self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_0.config(state=tk.NORMAL)
+        self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_0.delete(0, tk.END)
-        self.entry_0.config(state=tk.DISABLED)
+        self.entry_0.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_1.config(state=tk.NORMAL)
+        self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_1.delete(0, tk.END)
-        self.entry_1.config(state=tk.DISABLED)
+        self.entry_1.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_2.config(state=tk.NORMAL)
+        self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_2.delete(0, tk.END)
-        self.entry_2.config(state=tk.DISABLED)
+        self.entry_2.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_3.config(state=tk.NORMAL)
+        self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_3.delete(0, tk.END)
-        self.entry_3.config(state=tk.DISABLED)
+        self.entry_3.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_4.config(state=tk.NORMAL)
+        self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_4.delete(0, tk.END)
-        self.entry_4.config(state=tk.DISABLED)
+        self.entry_4.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_5.config(state=tk.NORMAL)
+        self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_5.delete(0, tk.END)
-        self.entry_5.config(state=tk.DISABLED)
+        self.entry_5.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_6.config(state=tk.NORMAL)
+        self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_6.delete(0, tk.END)
-        self.entry_6.config(state=tk.DISABLED)
+        self.entry_6.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_7.config(state=tk.NORMAL)
+        self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_7.delete(0, tk.END)
-        self.entry_7.config(state=tk.DISABLED)
+        self.entry_7.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_8.config(state=tk.NORMAL)
+        self.entry_8.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_8.delete(0, tk.END)
-        self.entry_8.config(state=tk.DISABLED)
+        self.entry_8.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_9.config(state=tk.NORMAL)
+        self.entry_9.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_9.delete(0, tk.END)
-        self.entry_9.config(state=tk.DISABLED)
+        self.entry_9.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
     
     def _ClearButtons(self, *args, **kwargs) -> None:
         
-        self.button_0_P_L.config(state=tk.DISABLED)
-        self.button_0_N_L.config(state=tk.DISABLED)
-        self.button_0_P_S.config(state=tk.DISABLED)
-        self.button_0_N_S.config(state=tk.DISABLED)
-        self.button_1_P_L.config(state=tk.DISABLED)
-        self.button_1_N_L.config(state=tk.DISABLED)
-        self.button_1_P_S.config(state=tk.DISABLED)
-        self.button_1_N_S.config(state=tk.DISABLED)
-        self.button_2_P_L.config(state=tk.DISABLED)
-        self.button_2_N_L.config(state=tk.DISABLED)
-        self.button_2_P_S.config(state=tk.DISABLED)
-        self.button_2_N_S.config(state=tk.DISABLED)
-        self.button_3_P_L.config(state=tk.DISABLED)
-        self.button_3_N_L.config(state=tk.DISABLED)
-        self.button_3_P_S.config(state=tk.DISABLED)
-        self.button_3_N_S.config(state=tk.DISABLED)
-        self.button_4_P_L.config(state=tk.DISABLED)
-        self.button_4_N_L.config(state=tk.DISABLED)
-        self.button_4_P_S.config(state=tk.DISABLED)
-        self.button_4_N_S.config(state=tk.DISABLED)
-        self.button_5_P_L.config(state=tk.DISABLED)
-        self.button_5_N_L.config(state=tk.DISABLED)
-        self.button_5_P_S.config(state=tk.DISABLED)
-        self.button_5_N_S.config(state=tk.DISABLED)
-        self.button_6_P_L.config(state=tk.DISABLED)
-        self.button_6_N_L.config(state=tk.DISABLED)
-        self.button_6_P_S.config(state=tk.DISABLED)
-        self.button_6_N_S.config(state=tk.DISABLED)
-        self.button_7_P_L.config(state=tk.DISABLED)
-        self.button_7_N_L.config(state=tk.DISABLED)
-        self.button_7_P_S.config(state=tk.DISABLED)
-        self.button_7_N_S.config(state=tk.DISABLED)
+        self.button_0_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_0_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_0_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_0_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_1_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_1_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_1_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_1_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_2_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_2_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_2_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_2_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_3_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_3_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_3_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_3_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_4_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_4_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_4_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_4_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_5_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_5_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_5_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_5_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_6_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_6_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_6_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_6_N_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_7_P_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_7_N_L.config(state=tk.DISABLED, bg="Light grey")
+        self.button_7_P_S.config(state=tk.DISABLED, bg="Light grey")
+        self.button_7_N_S.config(state=tk.DISABLED, bg="Light grey")
         
         if not self.folder_loaded:
-            self.button_forward.config(state=tk.DISABLED)
-            self.button_backward.config(state=tk.DISABLED)
+            self.button_forward.config(state=tk.DISABLED, bg="Light grey")
+            self.button_backward.config(state=tk.DISABLED, bg="Light grey")
         else:
             pass
         
@@ -1756,7 +1833,6 @@ class MainApplication(tk.Frame):
     
     
     def _Clear(self, *args, **kwargs) -> None:
-        
         self.file_loaded = False
         self.started = False
         self.fitted = False
@@ -1766,7 +1842,6 @@ class MainApplication(tk.Frame):
         self._ClearButtons()
         
         self.label_count.config(text='N/A')
-        
         return None
     
     
@@ -1794,12 +1869,12 @@ class MainApplication(tk.Frame):
             self.count = max(self.count - 1, 0)
             
         if self.count == self.max_count - 1:
-            self.button_forward.config(state=tk.DISABLED)
+            self.button_forward.config(state=tk.DISABLED, bg="Light grey")
         elif self.count == 0:
-            self.button_backward.config(state=tk.DISABLED)
+            self.button_backward.config(state=tk.DISABLED, bg="Light grey")
         else:
-            self.button_forward.config(state=tk.NORMAL)
-            self.button_backward.config(state=tk.NORMAL)
+            self.button_forward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_backward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         
         # 2
         filenameshort = self.dir_list[self.count]
@@ -1829,7 +1904,7 @@ class MainApplication(tk.Frame):
     
     
     def _LoadFile(self, *args, **kwargs) -> None:
-        
+        self.update_status("Loading file...")
         """
         This function is for loading a single file.
         
@@ -1868,7 +1943,8 @@ class MainApplication(tk.Frame):
             self.file_path = filename
             
             self._PrepareFile()
-            
+
+        self.update_status("File loaded successfully.")
         return None
     
     
@@ -1885,7 +1961,7 @@ class MainApplication(tk.Frame):
         """
         
         self._Clear()
-        self.button_simulate.config(state=tk.NORMAL)
+        self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.get_qI()
         self._Draw_qI()
         self._Classify()
@@ -1895,7 +1971,7 @@ class MainApplication(tk.Frame):
     
     
     def _LoadFolder(self, *args, **kwargs) -> None:
-        
+        self.update_status("Loading folder...")
         """
         This function is for loading a folder only of SAXS data.
         
@@ -1920,10 +1996,10 @@ class MainApplication(tk.Frame):
             # 2
             self._Clear()
             
-            self.button_file.config(state=tk.NORMAL)
-            self.button_clear.config(state=tk.NORMAL)
-            self.button_forward.config(state=tk.NORMAL)
-            self.button_backward.config(state=tk.NORMAL)
+            self.button_file.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_forward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_backward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
             
             self.source_path = source_path
             self.file_loaded = False
@@ -1938,12 +2014,12 @@ class MainApplication(tk.Frame):
         
         else:
             self.folder_loaded = False
-        
+        self.update_status("Folder loaded.")
         return None
     
     
     def _Export(self, *args, **kwargs) -> None:
-        
+        self.update_status("Exporting...")
         """
         This function is to store the parameters.
         
@@ -1991,7 +2067,7 @@ class MainApplication(tk.Frame):
         # 3
         target = os.path.join(self.working_dir, os.path.basename(self.file_path))
         shutil.copy(self.file_path, target)
-        
+        self.update_status("data exported.")
         return None
     
     
@@ -2014,7 +2090,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_0 += delta
-                self.entry_0.config(state=tk.NORMAL)
+                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
                 
@@ -2034,14 +2110,14 @@ class MainApplication(tk.Frame):
                 
                 if self._class == 0:
                     self.p_1 += delta
-                    self.entry_1.config(state=tk.NORMAL)
+                    self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                     self.entry_1.delete(0, tk.END)
                     self.entry_1.insert(0, f'{100*self.p_1:.3f}')
                 
                 elif self._class == 1:
                     delta *= 10
                     self.p_1 += delta
-                    self.entry_1.config(state=tk.NORMAL)
+                    self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                     self.entry_1.delete(0, tk.END)
                     self.entry_1.insert(0, f'{self.p_1:.3f}')
                 else:
@@ -2062,7 +2138,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_2 += delta
-                self.entry_2.config(state=tk.NORMAL)
+                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
             
@@ -2081,7 +2157,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_3 += delta
-                self.entry_3.config(state=tk.NORMAL)
+                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100*self.p_3:.3f}')
             
@@ -2100,7 +2176,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_4 += delta
-                self.entry_4.config(state=tk.NORMAL)
+                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000*self.p_4:.3f}')
             
@@ -2119,7 +2195,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_5 += delta
-                self.entry_5.config(state=tk.NORMAL)
+                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
 
@@ -2138,7 +2214,7 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_6 += delta
-                self.entry_6.config(state=tk.NORMAL)
+                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
 
@@ -2157,13 +2233,13 @@ class MainApplication(tk.Frame):
                         pass
                 
                 self.p_7 += delta
-                self.entry_7.config(state=tk.NORMAL)
+                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
 
             case _:
                 pass
-        
+
         return None
     
     
@@ -2195,15 +2271,15 @@ class MainApplication(tk.Frame):
         likely = round(pred)
         pred = 100*pred
                 
-        self.entry__class0.config(state=tk.NORMAL)
+        self.entry__class0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry__class0.delete(0, tk.END)
         self.entry__class0.insert(0, f'{100 - pred}%')
-        self.entry__class0.config(state=tk.DISABLED)
+        self.entry__class0.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry__class1.config(state=tk.NORMAL)
+        self.entry__class1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry__class1.delete(0, tk.END)
         self.entry__class1.insert(0, f'{pred}%')
-        self.entry__class1.config(state=tk.DISABLED)
+        self.entry__class1.config(state=tk.DISABLED, bg="Light grey")
         
         match likely:
             case 0:
@@ -2214,7 +2290,7 @@ class MainApplication(tk.Frame):
                 self._class = 1
         
         self._Reconfigure()
-        self.drop_methods.config(state=tk.NORMAL)
+        self.drop_methods.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.select_shapes.set(self.shape)
 
         return None
@@ -2245,47 +2321,47 @@ class MainApplication(tk.Frame):
     
     def _EnableInputs(self, *args, **kwargs) -> None:
         
-        self.entry_0.config(state=tk.NORMAL)
-        self.entry_1.config(state=tk.NORMAL)
-        self.entry_2.config(state=tk.NORMAL)
-        self.entry_3.config(state=tk.NORMAL)
-        self.entry_4.config(state=tk.NORMAL)
-        self.entry_5.config(state=tk.NORMAL)
-        self.entry_6.config(state=tk.NORMAL)
-        self.entry_7.config(state=tk.NORMAL)
+        self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         
-        self.button_0_P_L.config(state=tk.NORMAL)
-        self.button_0_N_L.config(state=tk.NORMAL)
-        self.button_0_P_S.config(state=tk.NORMAL)
-        self.button_0_N_S.config(state=tk.NORMAL)
-        self.button_1_P_L.config(state=tk.NORMAL)
-        self.button_1_N_L.config(state=tk.NORMAL)
-        self.button_1_P_S.config(state=tk.NORMAL)
-        self.button_1_N_S.config(state=tk.NORMAL)
-        self.button_2_P_L.config(state=tk.NORMAL)
-        self.button_2_N_L.config(state=tk.NORMAL)
-        self.button_2_P_S.config(state=tk.NORMAL)
-        self.button_2_N_S.config(state=tk.NORMAL)
-        self.button_3_P_L.config(state=tk.NORMAL)
-        self.button_3_N_L.config(state=tk.NORMAL)
-        self.button_3_P_S.config(state=tk.NORMAL)
-        self.button_3_N_S.config(state=tk.NORMAL)
-        self.button_4_P_L.config(state=tk.NORMAL)
-        self.button_4_N_L.config(state=tk.NORMAL)
-        self.button_4_P_S.config(state=tk.NORMAL)
-        self.button_4_N_S.config(state=tk.NORMAL)
-        self.button_5_P_L.config(state=tk.NORMAL)
-        self.button_5_N_L.config(state=tk.NORMAL)
-        self.button_5_P_S.config(state=tk.NORMAL)
-        self.button_5_N_S.config(state=tk.NORMAL)
-        self.button_6_P_L.config(state=tk.NORMAL)
-        self.button_6_N_L.config(state=tk.NORMAL)
-        self.button_6_P_S.config(state=tk.NORMAL)
-        self.button_6_N_S.config(state=tk.NORMAL)
-        self.button_7_P_L.config(state=tk.NORMAL)
-        self.button_7_N_L.config(state=tk.NORMAL)
-        self.button_7_P_S.config(state=tk.NORMAL)
-        self.button_7_N_S.config(state=tk.NORMAL)
+        self.button_0_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_0_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_0_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_0_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_1_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_1_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_1_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_1_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_2_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_2_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_2_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_2_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_3_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_3_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_3_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_3_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_4_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_4_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_4_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_4_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_5_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_5_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_5_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_5_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_6_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_6_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_6_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_6_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_7_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_7_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_7_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_7_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 
         return None
     
@@ -2293,15 +2369,15 @@ class MainApplication(tk.Frame):
     def _ToggleFeatures(self, *args, **kwargs) -> None:
         
         if self.started:
-            self.button_export.config(state=tk.NORMAL)
-            self.button_simulate.config(state=tk.NORMAL)
+            self.button_export.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
             self.button_simulate.config(text='Simulate')
-            self.button_visualize.config(state=tk.NORMAL)
+            self.button_visualize.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         else:
-            self.button_export.config(state=tk.DISABLED)
-            self.button_simulate.config(state=tk.DISABLED)
+            self.button_export.config(state=tk.DISABLED, bg="Light grey")
+            self.button_simulate.config(state=tk.DISABLED, bg="Light grey")
             self.button_simulate.config(text='Start')
-            self.button_visualize.config(state=tk.DISABLED)
+            self.button_visualize.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
@@ -2338,15 +2414,15 @@ class MainApplication(tk.Frame):
         
         if self.fitted:
             
-            self.drop_methods.config(state=tk.NORMAL)
-            self.drop_speeds.config(state=tk.NORMAL)
+            self.drop_methods.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.drop_speeds.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
 
-            self.button_export.config(state=tk.NORMAL)
-            self.button_visualize.config(state=tk.NORMAL)
+            self.button_export.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_visualize.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
             self.button_simulate.config(text='Simulate')
             
             self._EnableInputs()
-            
+
         return None
     
     
@@ -2449,35 +2525,35 @@ class MainApplication(tk.Frame):
             
             case 0:
     
-                self.entry_0.config(state=tk.NORMAL)
+                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
                 
-                self.entry_1.config(state=tk.NORMAL)
+                self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1.delete(0, tk.END)
                 self.entry_1.insert(0, f'{100*self.p_1:.3f}')
                 
-                self.entry_2.config(state=tk.NORMAL)
+                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
                 
-                self.entry_3.config(state=tk.NORMAL)
+                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100*self.p_3:.3f}')
                 
-                self.entry_4.config(state=tk.NORMAL)
+                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000*self.p_4:.3f}')
                 
-                self.entry_5.config(state=tk.NORMAL)
+                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
                 
-                self.entry_6.config(state=tk.NORMAL)
+                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
                 
-                self.entry_7.config(state=tk.NORMAL)
+                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
                 
@@ -2485,35 +2561,35 @@ class MainApplication(tk.Frame):
                 
             case 1:
                 
-                self.entry_0.config(state=tk.NORMAL)
+                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
                 
-                self.entry_1.config(state=tk.NORMAL)
+                self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1.delete(0, tk.END)
                 self.entry_1.insert(0, f'{self.p_1:.3f}')
                 
-                self.entry_2.config(state=tk.NORMAL)
+                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
                 
-                self.entry_3.config(state=tk.NORMAL)
+                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100*self.p_3:.3f}')
                 
-                self.entry_4.config(state=tk.NORMAL)
+                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000*self.p_4:.3f}')
                 
-                self.entry_5.config(state=tk.NORMAL)
+                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
                 
-                self.entry_6.config(state=tk.NORMAL)
+                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
                 
-                self.entry_7.config(state=tk.NORMAL)
+                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
                 
@@ -2522,15 +2598,15 @@ class MainApplication(tk.Frame):
             case _:
                 pass
         
-        self.entry_8.config(state=tk.NORMAL)
+        self.entry_8.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_8.delete(0, tk.END)
         self.entry_8.insert(0, f'{self.r_g_0:.3f}')
-        self.entry_8.config(state=tk.DISABLED)
+        self.entry_8.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_9.config(state=tk.NORMAL)
+        self.entry_9.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_9.delete(0, tk.END)
         self.entry_9.insert(0, f'{self.r_g_1:.3f}')
-        self.entry_9.config(state=tk.DISABLED)
+        self.entry_9.config(state=tk.DISABLED, bg="Light grey")
 
         return None
 
@@ -2541,97 +2617,97 @@ class MainApplication(tk.Frame):
             
             case 0:
     
-                self.entry_0_m.config(state=tk.NORMAL)
+                self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_m.delete(0, tk.END)
                 self.entry_0_m.insert(0, f'{self.p_0:.3f}')
-                self.entry_0_m.config(state=tk.DISABLED)
+                self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_0_s.config(state=tk.NORMAL)
+                self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_s.delete(0, tk.END)
                 self.entry_0_s.insert(0, f'{self.STD_0:.3f}')
-                self.entry_0_s.config(state=tk.DISABLED)
+                self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_0_d.config(state=tk.NORMAL)
+                self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_d.delete(0, tk.END)
                 self.entry_0_d.insert(0, '0')
-                self.entry_0_d.config(state=tk.DISABLED)
+                self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_m.config(state=tk.NORMAL)
+                self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_m.delete(0, tk.END)
                 self.entry_1_m.insert(0, f'{100*self.p_1:.3f}')
-                self.entry_1_m.config(state=tk.DISABLED)
+                self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_s.config(state=tk.NORMAL)
+                self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_s.delete(0, tk.END)
                 self.entry_1_s.insert(0, f'{100*self.STD_1:.3f}')
-                self.entry_1_s.config(state=tk.DISABLED)
+                self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_d.config(state=tk.NORMAL)
+                self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_d.delete(0, tk.END)
                 self.entry_1_d.insert(0, '0')
-                self.entry_1_d.config(state=tk.DISABLED)
+                self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_m.config(state=tk.NORMAL)
+                self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_m.delete(0, tk.END)
                 self.entry_2_m.insert(0, f'{self.p_2:.3f}')
-                self.entry_2_m.config(state=tk.DISABLED)
+                self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_s.config(state=tk.NORMAL)
+                self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_s.delete(0, tk.END)
                 self.entry_2_s.insert(0, f'{self.STD_2:.3f}')
-                self.entry_2_s.config(state=tk.DISABLED)
+                self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_d.config(state=tk.NORMAL)
+                self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_d.delete(0, tk.END)
                 self.entry_2_d.insert(0, '0')
-                self.entry_2_d.config(state=tk.DISABLED)
+                self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
                 
             case 1:
                 
-                self.entry_0_m.config(state=tk.NORMAL)
+                self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_m.delete(0, tk.END)
                 self.entry_0_m.insert(0, f'{self.p_0:.3f}')
-                self.entry_0_m.config(state=tk.DISABLED)
+                self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_0_s.config(state=tk.NORMAL)
+                self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_s.delete(0, tk.END)
                 self.entry_0_s.insert(0, f'{self.STD_0:.3f}')
-                self.entry_0_s.config(state=tk.DISABLED)
+                self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_0_d.config(state=tk.NORMAL)
+                self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_0_d.delete(0, tk.END)
                 self.entry_0_d.insert(0, '0')
-                self.entry_0_d.config(state=tk.DISABLED)
+                self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_m.config(state=tk.NORMAL)
+                self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_m.delete(0, tk.END)
                 self.entry_1_m.insert(0, f'{self.p_1:.3f}')
-                self.entry_1_m.config(state=tk.DISABLED)
+                self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_s.config(state=tk.NORMAL)
+                self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_s.delete(0, tk.END)
                 self.entry_1_s.insert(0, f'{self.STD_1:.3f}')
-                self.entry_1_s.config(state=tk.DISABLED)
+                self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_1_d.config(state=tk.NORMAL)
+                self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_1_d.delete(0, tk.END)
                 self.entry_1_d.insert(0, '0')
-                self.entry_1_d.config(state=tk.DISABLED)
+                self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_m.config(state=tk.NORMAL)
+                self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_m.delete(0, tk.END)
                 self.entry_2_m.insert(0, f'{self.p_2:.3f}')
-                self.entry_2_m.config(state=tk.DISABLED)
+                self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_s.config(state=tk.NORMAL)
+                self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_s.delete(0, tk.END)
                 self.entry_2_s.insert(0, f'{self.STD_2:.3f}')
-                self.entry_2_s.config(state=tk.DISABLED)
+                self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
                 
-                self.entry_2_d.config(state=tk.NORMAL)
+                self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
                 self.entry_2_d.delete(0, tk.END)
                 self.entry_2_d.insert(0, '0')
-                self.entry_2_d.config(state=tk.DISABLED)
+                self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
                 
             case _:
                 pass
@@ -2672,7 +2748,7 @@ class MainApplication(tk.Frame):
         self.I_sim = self.s.Debye_Scattering(q_arr=self.q_arr)
         
         self._Error()
-                
+
         return None
     
     
@@ -2684,10 +2760,10 @@ class MainApplication(tk.Frame):
         error = np.mean(np.square(np.log(self.I_arr + 1) - np.log(self.I_sim + 1)))
         self.error = error
         
-        self.Entry_MSLE.config(state=tk.NORMAL)
+        self.Entry_MSLE.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.Entry_MSLE.delete(0, tk.END)
         self.Entry_MSLE.insert(0, f'{error*1000:.3f}')
-        self.Entry_MSLE.config(state=tk.DISABLED)
+        self.Entry_MSLE.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
@@ -2714,20 +2790,20 @@ class MainApplication(tk.Frame):
         self.prob_1 = prob_1/np.sqrt(2*np.pi)
         self.prob_2 = prob_2/np.sqrt(2*np.pi)
         
-        self.entry_0_d.config(state=tk.NORMAL)
+        self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_0_d.delete(0, tk.END)
         self.entry_0_d.insert(0, f'{self.dev_0:.3f}')
-        self.entry_0_d.config(state=tk.DISABLED)
+        self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_1_d.config(state=tk.NORMAL)
+        self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_1_d.delete(0, tk.END)
         self.entry_1_d.insert(0, f'{self.dev_1:.3f}')
-        self.entry_1_d.config(state=tk.DISABLED)
+        self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
         
-        self.entry_2_d.config(state=tk.NORMAL)
+        self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
         self.entry_2_d.delete(0, tk.END)
         self.entry_2_d.insert(0, f'{self.dev_2:.3f}')
-        self.entry_2_d.config(state=tk.DISABLED)
+        self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
         
         return None
     
@@ -2961,7 +3037,7 @@ class MainApplication(tk.Frame):
     
     
     def _Simulate_as(self, *args, **kwargs) -> None:
-        
+        self.update_status("Starting simulation...")
         self._Classify()
         
         if not self.started:
@@ -2981,7 +3057,7 @@ class MainApplication(tk.Frame):
                 self._Simulate_as_1()
             case _:
                 pass
-        
+        self.update_status("Simulation completed.")
         return None
     
     
@@ -3068,7 +3144,7 @@ class MainApplication(tk.Frame):
     
     
     def _Visualize(self, *args, **kwargs) -> None:
-        
+        self.update_status("Visualizing results...")
         n = 4096
         s = self.s
         
@@ -3098,7 +3174,7 @@ class MainApplication(tk.Frame):
         toolbar = NavigationToolbar2Tk(canvas, top)
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
+        self.update_status("Visualization complete.")
         return None
     
     
@@ -3178,53 +3254,45 @@ class MainApplication(tk.Frame):
         self.X = X
     
         return None
-    
-    
+
     def _Help(self, *args, **kwargs) -> None:
-        
         text = """
-        Important parameters: The below parameters are the parameters that can 
-        be calcualted from the chemistry of the micelles and affects the 
-        scattering simulation significantly.
-        
-        Radius: the radius of the core of the micelle
-        Aspect ratio: the height-to-width ratio for spheroidal micelles
-        Length: the length of cylindrical micelles
-        PDI: the polydispersity of the micelle
-        Core fraction: the fraction of the micelle electrons located in the 
-        core
-        Scattering fraction: the percentage of the corona excess scatternig 
-        length density relative to that of the core
-        
-        Arbitrary parameters: The below parameters are the parameters that do
-        not affect the scattering simulation significantly.
-        
-        Corona length: the length of the corona of the micelles
-        Core density: a value between 0 and 2 for spheroidal micelles and a
-        value between 0 and 1 for cylindrical micelles; as the values
-        approaches 2 or 1 for spheroidal and cylindrical micelles respectively, 
-        the density becomes more uniform; as the values approaches 0, the
-        distribution becomes more radial (i.e., denser toward the center).
-        Corona density: a value between 0 and 2 for spheroidal micelles and a
-        value between 0 and 1 for cylindrical micelles; as the values
-        approaches 2 or 1 for spheroidal and cylindrical micelles respectively, 
-        the density becomes more uniform; as the values approaches 0, the
-        distribution becomes more radial (i.e., denser toward the center).
-        mMSLE: mili-mean-squared-logarithmic error; an arbitrary error rate
-        that gauges the fit of the simulation; favors the Guinier region
+        Important parameters:
+        ----------------------
+        These parameters significantly affect the scattering simulation:
+
+        - Radius: The radius of the core of the micelle
+        - Aspect Ratio: The height-to-width ratio for spheroidal micelles
+        - Length: The length of cylindrical micelles
+        - PDI (Polydispersity Index): The polydispersity of the micelle
+        - Core Fraction: The fraction of the micelle electrons located in the core
+        - Scattering Fraction: The percentage of the corona excess scattering length
+         density relative to that of the core
+
+        Arbitrary parameters:
+        ----------------------
+        These parameters do not significantly affect the scattering simulation:
+
+        - Corona Length: The length of the corona of the micelles
+        - Core Density: A value between 0 and 2 for spheroidal micelles and 0 and 1
+         for cylindrical micelles. As values approach 2 (or 1), the density becomes 
+         uniform.
+        - Corona Density: Similar to core density, but refers to the corona of the 
+          micelles.
+        - mMSLE: milli-mean-squared-logarithmic error; an arbitrary error rate that 
+          gauges the fit of the simulation, favoring the Guinier region.
         """
-        
+
         pop = tk.Toplevel()
-                        
+
         pop.title('Help')
         pop.geometry("480x512")
-        
+
         label_help = Label(pop, text=text)
         label_help.place(x=0, y=0)
-        
+
         return None
-    
-    
+
     def interpolate(self, *args, **kwargs) -> None:
         
         X_int = np.linspace(np.log10(0.64), np.log10(10.0), 64)
