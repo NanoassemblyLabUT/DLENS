@@ -248,11 +248,11 @@ class MainApplication(tk.Frame):
         entry__class0 = Entry(parent, textvariable=var__class0)
         entry__class0.place(height=30, width=64, x=400, y=19*dy)
         entry__class0.config(state=tk.DISABLED, bg="Light grey")
-        ToolTip(entry__class0, "Spheroid value, disabled until ready")
+        ToolTip(entry__class0, "Probability of being a Spheroid")
 
         label__class1 = Label(parent, text="Cylinder:")
         label__class1.place(height=30, width=64, x=464, y=19*dy)
-        ToolTip(label__class1, "Enter the Cylinder value here")
+        ToolTip(label__class1, "Probability of being a Cylinder")
 
         var__class1 = StringVar()
 
