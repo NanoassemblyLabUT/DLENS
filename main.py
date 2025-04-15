@@ -2676,7 +2676,7 @@ class MainApplication(tk.Frame):
             case 0:
                 self.p_0 = 256 * self.m_0
                 self.p_1 = 2 * self.m_1
-                self.p_2 = np.square(self.m_2)
+                self.p_2 = 10**(-4*self.m_2)/2
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2 * self.p_0
@@ -2693,7 +2693,7 @@ class MainApplication(tk.Frame):
             case 1:
                 self.p_0 = 256 * self.m_0
                 self.p_1 = 16 * self.m_1 * self.p_0
-                self.p_2 = np.square(self.m_2)
+                self.p_2 = 10**(-4*self.m_2)/2
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2 * self.p_0
@@ -3109,8 +3109,8 @@ class MainApplication(tk.Frame):
         r_1 = 100 * (m_1 + 1.96 * s_1) * 2
         l_1 = 100 * (m_1 - 1.96 * s_1) * 2
 
-        r_2 = (m_2 + 1.96 * s_2) / 2
-        l_2 = (m_2 - 1.96 * s_2) / 2
+        r_2 = (10 ** (-4 * (m_2 + 1.96 * s_2))) / 2
+        l_2 = (10 ** (-4 * (m_2 - 1.96 * s_2))) / 2
 
         temp = np.linspace(0, 2, 257)[:-1]
 
