@@ -5,6 +5,7 @@ Before you begin, ensure you have Python installed. You can download it from the
 - Go to [Python Downloads](https://www.python.org/downloads/)
 - Select 3.12 or less for your operating system. This will enable tensorflow 2.17.0 to work with the environment.
 - Run the installer and **ensure the "Add Python to PATH" checkbox** is checked.
+- In your terminal, type "alias python=python3"
   
 ## **If you already have Python downloaded, ensure it is 3.12 or less.** 
 <br><br><br>
