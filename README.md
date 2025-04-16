@@ -60,13 +60,16 @@ Install dependencies using *pip*:
 
 Alternatively, you can manually install them one by one with:
 
-*pip install numpy==1.26.4*
+*pip install numpy*
 
-*pip install scikit-learn==1.2.1*
+*pip install scikit-learn*
 
-*pip install scipy==1.14.1*
+*pip install scipy*
 
-*pip install tensorflow==2.17.0*
+*pip install tensorflow*
+
+*pip install matplotlib*
+
 
 
 # 6. Configure the IDE
