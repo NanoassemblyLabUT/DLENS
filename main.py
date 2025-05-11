@@ -819,9 +819,13 @@ class MainApplication(tk.Frame):
 
     def _LoadModels(self, *args, **kwargs) -> None:
 
-        cwd = self.cwd
+        if getattr(sys, 'frozen', False):  # App is frozen (e.g., bundled by pyinstaller)
+            app_dir = os.path.dirname(os.path.abspath(sys.executable))
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(app_dir)))  # go from D_Lens.app/Contents/MacOS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        model_dir = os.path.join(cwd, 'Models')
+        model_dir = os.path.join(base_dir, 'Models')
 
         name_s_0 = "2025_01_21_sphere_CPNN_Radius_0.keras"
         name_s_1 = "2025_01_21_sphere_CPNN_AspectRatio_0.keras"
