@@ -17,10 +17,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from math import sqrt
 
 from scaled_Debye import Disperse_Spheroid_Shell, Disperse_Cylinder_Shell
+
 """
 The Debye module is a file that works alongside this file.
 """
 from PIL import Image, ImageTk
+
 
 class ToolTip:
     def __init__(self, widget, text):
@@ -37,7 +39,7 @@ class ToolTip:
         self.tooltip = tk.Toplevel(self.widget)
         self.tooltip.wm_overrideredirect(True)
         self.tooltip.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(self.tooltip, text=self.text, background="lightyellow", relief="solid",
+        label = tk.Label(self.tooltip, text=self.text, background="#FFFFE0", fg="#000000", relief="solid",
                          borderwidth=1)
         label.pack()
 
@@ -85,7 +87,7 @@ class MainApplication(tk.Frame):
                 - working_dir: directory for a new run
                     - This stores the exported SAXS data.
                 - Also stores all the logs.
-        
+
         """
 
         base_path = os.path.join(cwd, 'SAXS_SIM')
@@ -133,7 +135,7 @@ class MainApplication(tk.Frame):
             - folder_loaded: return True if a folder is loaded.
             - fitted: return True if a simulation is ran.
             - started: return True if the user hit Start.
-            
+
             - shape: a string value that describes the shape
             - _class: an integer value corresponding to shape
             - count: the file count of the folder loaded
@@ -223,11 +225,10 @@ class MainApplication(tk.Frame):
 
         entry_comment = Entry(parent, textvariable=var_comment)
         entry_comment.place(height=30, width=192, x=144, y=19 * dy)
-        entry_comment.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        entry_comment.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
         label_class_0 = Label(parent, text="Spheroid:")
         label_class_0.place(height=30, width=64, x=336, y=19 * dy)
-        ToolTip(label_class_0, "Enter the Spheroid value here")
 
         var__class0 = StringVar()
 
@@ -245,17 +246,16 @@ class MainApplication(tk.Frame):
         entry_class_1 = Entry(parent, textvariable=var__class1)
         entry_class_1.place(height=30, width=64, x=528, y=19 * dy)
         entry_class_1.config(state=tk.DISABLED, bg="Light grey")
-        ToolTip(entry_class_1, "Cylinder value, disabled until ready")
 
         button_autosub = Button(parent, text='Auto-subtraction', command=self._Autosubtraction)
-        button_autosub.place(height=30, width=96, x=512, y=9 * dy)
+        button_autosub.place(height=30, width=110, x=512, y=9 * dy)
         ToolTip(button_autosub, "Click to perform auto-subtraction")
 
         button_help = Button(parent, text='Help', command=self._Help)
-        button_help.place(height=30, width=96, x=512, y=11 * dy)
+        button_help.place(height=30, width=110, x=512, y=11 * dy)
         ToolTip(button_help, "Click to access help")
         self.drop_methods = drop_methods
-        
+
         self.select_shapes = select_shapes
 
         self.button_file = button_file
@@ -791,7 +791,6 @@ class MainApplication(tk.Frame):
 
         return None
 
-
     def _Layout(self, *args, **kwargs) -> None:
 
         """
@@ -941,12 +940,12 @@ class MainApplication(tk.Frame):
 
         button_raw = Button(parent, text="Load Raw Data", command=self._Sub_Load_0)
         button_raw.place(height=height, width=width, x=dx, y=1 * dy)
-        button_raw.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        button_raw.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         ToolTip(button_raw, "Load the raw data file for subtraction.")
 
         button_back = Button(parent, text="Load Buffer Data", command=self._Sub_Load_1)
         button_back.place(height=height, width=width, x=dx, y=4 * dy)
-        button_back.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        button_back.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         ToolTip(button_back, "Load the buffer data file for subtraction.")
 
         button_sub = Button(parent, text="Subtract", command=self._Sub_Subtract)
@@ -1051,7 +1050,7 @@ class MainApplication(tk.Frame):
 
         """
         This function creates the necessary paths and files.
-        
+
         CWD
             - Subtraction (base_path)
                 - (working_dir)
@@ -1217,7 +1216,7 @@ class MainApplication(tk.Frame):
             comment = self.comment
 
             self._Clear()
-            self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_simulate.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
             with open(sub_log_path, "a") as f:
                 f.write(f"{raw_origin},{back_origin},{new_sub_path},{alpha},{q_crit},{comment}\n")
@@ -1365,12 +1364,12 @@ class MainApplication(tk.Frame):
             pass
 
         if self.sub_loaded_0 and self.sub_loaded_1:
-            self.sub_button_sub.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.sub_button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.sub_button_use.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.sub_button_sub.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.sub_button_clear.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.sub_button_use.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         elif self.sub_loaded_0 or self.sub_loaded_1:
             self.sub_button_sub.config(state=tk.DISABLED, bg="Light grey")
-            self.sub_button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.sub_button_clear.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
             self.sub_button_use.config(state=tk.DISABLED, bg="Light grey")
         else:
             self.sub_button_sub.config(state=tk.DISABLED, bg="Light grey")
@@ -1866,79 +1865,79 @@ class MainApplication(tk.Frame):
 
     def _ClearEntries(self, *args, **kwargs) -> None:
 
-        self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_0_m.delete(0, tk.END)
         self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_0_s.delete(0, tk.END)
         self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_0_d.delete(0, tk.END)
         self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_1_m.delete(0, tk.END)
         self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_1_s.delete(0, tk.END)
         self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_1_d.delete(0, tk.END)
         self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_2_m.delete(0, tk.END)
         self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_2_s.delete(0, tk.END)
         self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_2_d.delete(0, tk.END)
         self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_0.delete(0, tk.END)
         self.entry_0.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_1.delete(0, tk.END)
         self.entry_1.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_2.delete(0, tk.END)
         self.entry_2.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_3.delete(0, tk.END)
         self.entry_3.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_4.delete(0, tk.END)
         self.entry_4.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_5.delete(0, tk.END)
         self.entry_5.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_6.delete(0, tk.END)
         self.entry_6.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_7.delete(0, tk.END)
         self.entry_7.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_8.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_8.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_8.delete(0, tk.END)
         self.entry_8.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_9.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_9.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_9.delete(0, tk.END)
         self.entry_9.config(state=tk.DISABLED, bg="Light grey")
 
@@ -2069,7 +2068,7 @@ class MainApplication(tk.Frame):
 
         """
         This function is for changing the file when a folder is loaded.
-        
+
         1. Decide whether to move forward or backward in a folder.
         2. Get the file name.
         3. Get the file path.
@@ -2090,13 +2089,13 @@ class MainApplication(tk.Frame):
 
         if self.count == self.max_count - 1:
             self.button_forward.config(state=tk.DISABLED, bg="Light grey")
-            self.button_backward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_backward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         elif self.count == 0:
-            self.button_forward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_forward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
             self.button_backward.config(state=tk.DISABLED, bg="Light grey")
         else:
-            self.button_forward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_backward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_forward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_backward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
         # 2
         filenameshort = self.dir_list[self.count]
@@ -2126,7 +2125,7 @@ class MainApplication(tk.Frame):
         self.update_status("Loading file...")
         """
         This function is for loading a single file.
-        
+
         1. Get the file path.
         2. Get the source directory of the loaded file.
             a. This is to copy the file later.
@@ -2170,7 +2169,7 @@ class MainApplication(tk.Frame):
 
         """
         This function is to prepare a file for viewing.
-        
+
         1. Clear the plots, entries, and parameters.
         2. Get the new SAXS data.
         3. Draw the new SAXS data.
@@ -2179,7 +2178,7 @@ class MainApplication(tk.Frame):
         """
 
         self._Clear()
-        self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_simulate.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.get_qI()
         self._Draw_qI()
         self._Classify()
@@ -2191,11 +2190,11 @@ class MainApplication(tk.Frame):
         self.update_status("Loading folder...")
         """
         This function is for loading a folder only of SAXS data.
-        
+
         1. Get the folder path.
         2. Clear plots, entries, and parameters.
         3. Start the count and move forward.
-        
+
         """
 
         # 1
@@ -2213,10 +2212,10 @@ class MainApplication(tk.Frame):
             # 2
             self._Clear()
 
-            self.button_file.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_clear.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_forward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_backward.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_file.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_clear.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_forward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_backward.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
             self.source_path = source_path
             self.file_loaded = False
@@ -2240,11 +2239,11 @@ class MainApplication(tk.Frame):
         self.update_status("Exporting...")
         """
         This function is to store the parameters.
-        
+
         1. Get the parameter values.
         2. Write them to the log.
         3. Copy the SAXS data to the new working directory.
-        
+
         """
 
         # 1
@@ -2316,7 +2315,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_0 += delta
-                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
 
@@ -2336,14 +2335,14 @@ class MainApplication(tk.Frame):
 
                 if self._class == 0:
                     self.p_1 += delta
-                    self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                    self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                     self.entry_1.delete(0, tk.END)
                     self.entry_1.insert(0, f'{100 * self.p_1:.3f}')
 
                 elif self._class == 1:
                     delta *= 10
                     self.p_1 += delta
-                    self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                    self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                     self.entry_1.delete(0, tk.END)
                     self.entry_1.insert(0, f'{self.p_1:.3f}')
                 else:
@@ -2364,7 +2363,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_2 += delta
-                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
 
@@ -2383,7 +2382,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_3 += delta
-                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100 * self.p_3:.3f}')
 
@@ -2402,7 +2401,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_4 += delta
-                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000 * self.p_4:.3f}')
 
@@ -2421,7 +2420,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_5 += delta
-                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
 
@@ -2440,7 +2439,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_6 += delta
-                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
 
@@ -2459,7 +2458,7 @@ class MainApplication(tk.Frame):
                         pass
 
                 self.p_7 += delta
-                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
 
@@ -2496,12 +2495,12 @@ class MainApplication(tk.Frame):
         likely = round(pred)
         pred = 100 * pred
 
-        self.entry_class_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_class_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_class_0.delete(0, tk.END)
         self.entry_class_0.insert(0, f'{100 - pred}%')
         self.entry_class_0.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_class_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_class_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_class_1.delete(0, tk.END)
         self.entry_class_1.insert(0, f'{pred}%')
         self.entry_class_1.config(state=tk.DISABLED, bg="Light grey")
@@ -2519,7 +2518,7 @@ class MainApplication(tk.Frame):
                 self.new_mode = 'Cylinder'
 
         self._Reconfigure()
-        self.drop_methods.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.drop_methods.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.select_shapes.set(self.shape)
 
         return None
@@ -2548,57 +2547,57 @@ class MainApplication(tk.Frame):
 
     def _EnableInputs(self, *args, **kwargs) -> None:
 
-        self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
-        self.button_0_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_0_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_0_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_0_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_1_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_1_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_1_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_1_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_2_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_2_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_2_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_2_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_3_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_3_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_3_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_3_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_4_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_4_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_4_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_4_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_5_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_5_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_5_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_5_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_6_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_6_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_6_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_6_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_7_P_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_7_N_L.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_7_P_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-        self.button_7_N_S.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.button_0_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_0_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_0_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_0_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_1_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_1_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_1_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_1_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_2_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_2_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_2_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_2_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_3_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_3_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_3_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_3_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_4_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_4_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_4_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_4_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_5_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_5_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_5_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_5_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_6_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_6_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_6_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_6_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_7_P_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_7_N_L.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_7_P_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+        self.button_7_N_S.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
         return None
 
     def _ToggleFeatures(self, *args, **kwargs) -> None:
 
         if self.started:
-            self.button_export.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_simulate.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_export.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_simulate.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
             self.button_simulate.config(text='Simulate')
-            self.button_visualize.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_visualize.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         else:
             self.button_export.config(state=tk.DISABLED, bg="Light grey")
             self.button_simulate.config(state=tk.DISABLED, bg="Light grey")
@@ -2638,10 +2637,10 @@ class MainApplication(tk.Frame):
         self._DisplayProbability()
 
         if self.fitted:
-            self.drop_methods.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.drop_methods.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
 
-            self.button_export.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
-            self.button_visualize.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+            self.button_export.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
+            self.button_visualize.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
             self.button_simulate.config(text='Simulate')
 
             self._EnableInputs()
@@ -2701,7 +2700,7 @@ class MainApplication(tk.Frame):
             case 0:
                 self.p_0 = 256 * self.m_0
                 self.p_1 = 2 * self.m_1
-                self.p_2 = 10**(-4*self.m_2)/2
+                self.p_2 = 10 ** (-4 * self.m_2) / 2
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2 * self.p_0
@@ -2718,7 +2717,7 @@ class MainApplication(tk.Frame):
             case 1:
                 self.p_0 = 256 * self.m_0
                 self.p_1 = 16 * self.m_1 * self.p_0
-                self.p_2 = 10**(-4*self.m_2)/2
+                self.p_2 = 10 ** (-4 * self.m_2) / 2
                 self.p_3 = 0.75
                 self.p_4 = 0.025
                 self.p_5 = 2 * self.p_0
@@ -2745,35 +2744,35 @@ class MainApplication(tk.Frame):
 
             case 0:
 
-                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
 
-                self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1.delete(0, tk.END)
                 self.entry_1.insert(0, f'{100 * self.p_1:.3f}')
 
-                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
 
-                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100 * self.p_3:.3f}')
 
-                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000 * self.p_4:.3f}')
 
-                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
 
-                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
 
-                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
 
@@ -2781,35 +2780,35 @@ class MainApplication(tk.Frame):
 
             case 1:
 
-                self.entry_0.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0.delete(0, tk.END)
                 self.entry_0.insert(0, f'{self.p_0:.3f}')
 
-                self.entry_1.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1.delete(0, tk.END)
                 self.entry_1.insert(0, f'{self.p_1:.3f}')
 
-                self.entry_2.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2.delete(0, tk.END)
                 self.entry_2.insert(0, f'{self.p_2:.3f}')
 
-                self.entry_3.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_3.delete(0, tk.END)
                 self.entry_3.insert(0, f'{100 * self.p_3:.3f}')
 
-                self.entry_4.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_4.delete(0, tk.END)
                 self.entry_4.insert(0, f'{1000 * self.p_4:.3f}')
 
-                self.entry_5.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_5.delete(0, tk.END)
                 self.entry_5.insert(0, f'{self.p_5:.3f}')
 
-                self.entry_6.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_6.delete(0, tk.END)
                 self.entry_6.insert(0, f'{self.p_6:.3f}')
 
-                self.entry_7.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_7.delete(0, tk.END)
                 self.entry_7.insert(0, f'{self.p_7:.3f}')
 
@@ -2818,12 +2817,12 @@ class MainApplication(tk.Frame):
             case _:
                 pass
 
-        self.entry_8.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_8.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_8.delete(0, tk.END)
         self.entry_8.insert(0, f'{self.r_g_0:.3f}')
         self.entry_8.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_9.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_9.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_9.delete(0, tk.END)
         self.entry_9.insert(0, f'{self.r_g_1:.3f}')
         self.entry_9.config(state=tk.DISABLED, bg="Light grey")
@@ -2836,94 +2835,94 @@ class MainApplication(tk.Frame):
 
             case 0:
 
-                self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_m.delete(0, tk.END)
                 self.entry_0_m.insert(0, f'{self.p_0:.3f}')
                 self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_s.delete(0, tk.END)
                 self.entry_0_s.insert(0, f'{self.STD_0:.3f}')
                 self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_d.delete(0, tk.END)
                 self.entry_0_d.insert(0, '0')
                 self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_m.delete(0, tk.END)
                 self.entry_1_m.insert(0, f'{100 * self.p_1:.3f}')
                 self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_s.delete(0, tk.END)
                 self.entry_1_s.insert(0, f'{100 * self.STD_1:.3f}')
                 self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_d.delete(0, tk.END)
                 self.entry_1_d.insert(0, '0')
                 self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_m.delete(0, tk.END)
                 self.entry_2_m.insert(0, f'{self.p_2:.3f}')
                 self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_s.delete(0, tk.END)
                 self.entry_2_s.insert(0, f'{self.STD_2:.3f}')
                 self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_d.delete(0, tk.END)
                 self.entry_2_d.insert(0, '0')
                 self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
 
             case 1:
 
-                self.entry_0_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_m.delete(0, tk.END)
                 self.entry_0_m.insert(0, f'{self.p_0:.3f}')
                 self.entry_0_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_0_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_s.delete(0, tk.END)
                 self.entry_0_s.insert(0, f'{self.STD_0:.3f}')
                 self.entry_0_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_0_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_0_d.delete(0, tk.END)
                 self.entry_0_d.insert(0, '0')
                 self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_m.delete(0, tk.END)
                 self.entry_1_m.insert(0, f'{self.p_1:.3f}')
                 self.entry_1_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_s.delete(0, tk.END)
                 self.entry_1_s.insert(0, f'{self.STD_1:.3f}')
                 self.entry_1_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_1_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_1_d.delete(0, tk.END)
                 self.entry_1_d.insert(0, '0')
                 self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_m.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_m.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_m.delete(0, tk.END)
                 self.entry_2_m.insert(0, f'{self.p_2:.3f}')
                 self.entry_2_m.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_s.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_s.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_s.delete(0, tk.END)
                 self.entry_2_s.insert(0, f'{self.STD_2:.3f}')
                 self.entry_2_s.config(state=tk.DISABLED, bg="Light grey")
 
-                self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+                self.entry_2_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
                 self.entry_2_d.delete(0, tk.END)
                 self.entry_2_d.insert(0, '0')
                 self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
@@ -2991,7 +2990,7 @@ class MainApplication(tk.Frame):
         error = np.mean(np.square(np.log(self.I_arr + 1) - np.log(self.I_sim + 1)))
         self.error = error
 
-        self.Entry_MSLE.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.Entry_MSLE.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.Entry_MSLE.delete(0, tk.END)
         self.Entry_MSLE.insert(0, f'{error * 1000:.3f}')
         self.Entry_MSLE.config(state=tk.DISABLED, bg="Light grey")
@@ -3020,17 +3019,17 @@ class MainApplication(tk.Frame):
         self.prob_1 = prob_1 / np.sqrt(2 * np.pi)
         self.prob_2 = prob_2 / np.sqrt(2 * np.pi)
 
-        self.entry_0_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_0_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_0_d.delete(0, tk.END)
         self.entry_0_d.insert(0, f'{self.dev_0:.3f}')
         self.entry_0_d.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_1_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_1_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_1_d.delete(0, tk.END)
         self.entry_1_d.insert(0, f'{self.dev_1:.3f}')
         self.entry_1_d.config(state=tk.DISABLED, bg="Light grey")
 
-        self.entry_2_d.config(state=tk.NORMAL, background="SystemButtonFace", foreground="black")
+        self.entry_2_d.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
         self.entry_2_d.delete(0, tk.END)
         self.entry_2_d.insert(0, f'{self.dev_2:.3f}')
         self.entry_2_d.config(state=tk.DISABLED, bg="Light grey")
@@ -3045,7 +3044,7 @@ class MainApplication(tk.Frame):
 
         self.dev_0 = (self.p_0 / 256 - self.m_0) / self.s_0
         self.dev_1 = (self.p_1 / 2 - self.m_1) / self.s_1
-        self.dev_2 = (-np.log10(self.p_2*2)/4 - self.m_2)/self.s_2
+        self.dev_2 = (-np.log10(self.p_2 * 2) / 4 - self.m_2) / self.s_2
 
         return None
 
@@ -3057,7 +3056,7 @@ class MainApplication(tk.Frame):
 
         self.dev_0 = (self.p_0 / 256 - self.m_0) / self.s_0
         self.dev_1 = (self.p_1 / (16 * self.p_0) - self.m_1) / self.s_1
-        self.dev_2 = (-np.log10(self.p_2*2)/4 - self.m_2)/self.s_2
+        self.dev_2 = (-np.log10(self.p_2 * 2) / 4 - self.m_2) / self.s_2
 
         return None
 
@@ -3173,7 +3172,7 @@ class MainApplication(tk.Frame):
         canvas_1.draw()
 
         plot_2.clear()
-        plot_2.plot(np.power(10, -4*temp)/2, self.prob_2, color='blue')
+        plot_2.plot(np.power(10, -4 * temp) / 2, self.prob_2, color='blue')
         plot_2.axvline(self.p_2, color='red')
         plot_2.axvline(r_2, color='black', linestyle='dashed')
         plot_2.axvline(l_2, color='black', linestyle='dashed')
@@ -3244,7 +3243,7 @@ class MainApplication(tk.Frame):
         canvas_1.draw()
 
         plot_2.clear()
-        plot_2.plot(np.power(10, -4*temp)/2, self.prob_2, color='blue')
+        plot_2.plot(np.power(10, -4 * temp) / 2, self.prob_2, color='blue')
         plot_2.axvline(self.p_2, color='red')
         plot_2.axvline(r_2, color='black', linestyle='dashed')
         plot_2.axvline(l_2, color='black', linestyle='dashed')
