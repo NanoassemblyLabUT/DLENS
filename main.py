@@ -817,72 +817,46 @@ class MainApplication(tk.Frame):
         self._LayPlots()
         return None
 
+
     def _LoadModels(self, *args, **kwargs) -> None:
-
-        if getattr(sys, 'frozen', False):  # App is frozen (e.g., bundled by pyinstaller)
-            app_dir = os.path.dirname(os.path.abspath(sys.executable))
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(app_dir)))  # go from D_Lens.app/Contents/MacOS
+        """
+        Load all ML models from the bundled 'Models' directory,
+        whether in dev or inside a PyInstaller executable.
+        """
+        if getattr(sys, "frozen", False):
+            # PyInstaller unpacks resources to this temp folder
+            base_path = sys._MEIPASS
         else:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
+            # Running live: resources are alongside this file
+            base_path = os.path.dirname(os.path.abspath(__file__))
+        # Path to the Models folder (bundled or on-disk)
+        model_dir = os.path.join(base_path, "Models")
 
-        model_dir = os.path.join(base_dir, 'Models')
+        # Filenames of all your models
+        model_files = {
+            "model_s_0": "2025_01_21_sphere_CPNN_Radius_0.keras",
+            "model_s_1": "2025_01_21_sphere_CPNN_AspectRatio_0.keras",
+            "model_s_2": "2025_03_09_sphere_CPNN_PDI_0.keras",
+            "model_s_3": "2025_01_21_sphere_CPNN_GyrationRadius_0.keras",
+            "model_c_0": "2025_01_21_cylinder_CPNN_Radius_0.keras",
+            "model_c_1": "2025_01_21_cylinder_CPNN_AspectRatio_0.keras",
+            "model_c_2": "2025_03_09_cylinder_CPNN_PDI_0.keras",
+            "model_c_3": "2025_01_21_cylinder_CPNN_GyrationRadius_0.keras",
+            "model_qr": "2025_01_26_SCNN_qr_0.keras",
+            "model_cl": "2025_01_26_SVM_C_0.pkl",
+        }
 
-        name_s_0 = "2025_01_21_sphere_CPNN_Radius_0.keras"
-        name_s_1 = "2025_01_21_sphere_CPNN_AspectRatio_0.keras"
-        name_s_2 = '2025_03_09_sphere_CPNN_PDI_0.keras'
-        name_s_3 = '2025_01_21_sphere_CPNN_GyrationRadius_0.keras'
-
-        name_c_0 = "2025_01_21_cylinder_CPNN_Radius_0.keras"
-        name_c_1 = "2025_01_21_cylinder_CPNN_AspectRatio_0.keras"
-        name_c_2 = '2025_03_09_cylinder_CPNN_PDI_0.keras'
-        name_c_3 = '2025_01_21_cylinder_CPNN_GyrationRadius_0.keras'
-
-        name_qr = "2025_01_26_SCNN_qr_0.keras"
-
-        name_cl = "2025_01_26_SVM_C_0.pkl"
-
-        path_s_0 = os.path.join(model_dir, name_s_0)
-        path_s_1 = os.path.join(model_dir, name_s_1)
-        path_s_2 = os.path.join(model_dir, name_s_2)
-        path_s_3 = os.path.join(model_dir, name_s_3)
-
-        path_c_0 = os.path.join(model_dir, name_c_0)
-        path_c_1 = os.path.join(model_dir, name_c_1)
-        path_c_2 = os.path.join(model_dir, name_c_2)
-        path_c_3 = os.path.join(model_dir, name_c_3)
-
-        path_qr = os.path.join(model_dir, name_qr)
-
-        path_cl = os.path.join(model_dir, name_cl)
-
-        model_s_0 = tf.keras.models.load_model(path_s_0, compile=False)
-        model_s_1 = tf.keras.models.load_model(path_s_1, compile=False)
-        model_s_2 = tf.keras.models.load_model(path_s_2, compile=False)
-        model_s_3 = tf.keras.models.load_model(path_s_3, compile=False)
-
-        model_c_0 = tf.keras.models.load_model(path_c_0, compile=False)
-        model_c_1 = tf.keras.models.load_model(path_c_1, compile=False)
-        model_c_2 = tf.keras.models.load_model(path_c_2, compile=False)
-        model_c_3 = tf.keras.models.load_model(path_c_3, compile=False)
-
-        model_qr = tf.keras.models.load_model(path_qr, compile=False)
-
-        with open(path_cl, 'rb') as f:
-            model_cl = pk.load(f)
-
-        self.model_s_0 = model_s_0
-        self.model_s_1 = model_s_1
-        self.model_s_2 = model_s_2
-        self.model_s_3 = model_s_3
-
-        self.model_c_0 = model_c_0
-        self.model_c_1 = model_c_1
-        self.model_c_2 = model_c_2
-        self.model_c_3 = model_c_3
-
-        self.model_qr = model_qr
-
-        self.model_cl = model_cl
+        # Load all Keras models
+        for attr, filename in model_files.items():
+            full_path = os.path.join(model_dir, filename)
+            if attr == "model_cl":
+                # pickle‐load the classifier
+                with open(full_path, "rb") as f:
+                    setattr(self, attr, pk.load(f))
+            else:
+                # Keras models
+                setattr(self, attr,
+                        tf.keras.models.load_model(full_path, compile=False))
 
         return None
 
