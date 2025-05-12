@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import platform
 
 import numpy as np
 import tkinter as tk
@@ -87,10 +88,18 @@ class MainApplication(tk.Frame):
                 - working_dir: directory for a new run
                     - This stores the exported SAXS data.
                 - Also stores all the logs.
-
         """
 
-        base_path = os.path.join(cwd, 'SAXS_SIM')
+        # Get the user's home directory in a cross-platform way
+        cwd = os.path.expanduser("~")  # User's home directory
+
+        # Platform-specific base path
+        if platform.system() == "Darwin":  # macOS
+            base_path = os.path.join(cwd, 'SAXS_SIM')
+        elif platform.system() == "Windows":  # Windows
+            base_path = os.path.join(cwd, 'Documents', 'SAXS_SIM')  # You can modify this path if needed
+        else:  # Other Unix-like systems (Linux)
+            base_path = os.path.join(cwd, 'SAXS_SIM')
 
         if not os.path.exists(base_path):
             os.makedirs(base_path)
@@ -101,6 +110,7 @@ class MainApplication(tk.Frame):
 
         count = 0
 
+        # Create unique directory for the new run
         while True:
             temp = f'{username}_{current}_{count}'
             if temp not in os.listdir(base_path):
@@ -111,6 +121,7 @@ class MainApplication(tk.Frame):
         log_end = 'csv'
         log_file = f'{temp}.{log_end}'
 
+        # Create working directory for the current run
         working_dir = os.path.join(base_path, temp)
 
         if not os.path.exists(working_dir):
@@ -118,12 +129,14 @@ class MainApplication(tk.Frame):
 
         log_path = os.path.join(base_path, log_file)
 
+        # Create and write to the log file
         with open(log_path, 'w') as f:
             f.write(
                 'CWD,From,File,Shape,Param 1,Param 2,Param 3,Param 4,Param 5,Param 6,Param 7,mu 1,mu 2,sigma 1,sigma 2,'
                 'Error,R_g,R_g,Comment\n'
             )
 
+        # Store the paths for later use
         self.log_file = log_file
         self.base_path = base_path
         self.working_dir = working_dir
@@ -141,6 +154,7 @@ class MainApplication(tk.Frame):
             - count: the file count of the folder loaded
         """
 
+        # Default values for internal parameters
         self.file_loaded = False
         self.folder_loaded = False
         self.fitted = False
@@ -3533,6 +3547,11 @@ class MainApplication(tk.Frame):
 
 
 def main(*args, **kwargs) -> int:
+    if getattr(sys, 'frozen', False):
+        # Only when bundled with PyInstaller
+        log_path = os.path.expanduser("~/Desktop/dlens_log.txt")
+        sys.stdout = open(log_path, 'w')
+        sys.stderr = open(log_path, 'w')
     root = tk.Tk()
     MainApplication(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
