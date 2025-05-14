@@ -831,22 +831,43 @@ class MainApplication(tk.Frame):
         self._LayPlots()
         return None
 
-
     def _LoadModels(self, *args, **kwargs) -> None:
         """
-        Load all ML models from the bundled 'Models' directory,
-        whether in dev or inside a PyInstaller executable.
+        Load all ML models from the bundled 'Models' directory if frozen,
+        otherwise fall back to an external 'Models' sibling folder.
         """
-        if getattr(sys, "frozen", False):
-            # PyInstaller unpacks resources to this temp folder
-            base_path = sys._MEIPASS
-        else:
-            # Running live: resources are alongside this file
-            base_path = os.path.dirname(os.path.abspath(__file__))
-        # Path to the Models folder (bundled or on-disk)
-        model_dir = os.path.join(base_path, "Models")
+        # 1) Determine candidate model directories
+        candidates = []
 
-        # Filenames of all your models
+        if getattr(sys, "frozen", False):
+            # PyInstaller: first try the internal bundle
+            candidates.append(os.path.join(sys._MEIPASS, "Models"))
+
+            # Next try a sibling Models folder next to the .app (or exe)
+            # sys.executable → .../D-LENS.app/Contents/MacOS/D-LENS
+            exe_path = sys.executable
+            # Move up three levels to get the .app bundle
+            bundle_dir = os.path.abspath(os.path.join(exe_path, os.pardir, os.pardir, os.pardir))
+            parent_dir = os.path.dirname(bundle_dir)
+            candidates.append(os.path.join(parent_dir, "Models"))
+        else:
+            # Running from source: look next to this file
+            here = os.path.dirname(os.path.abspath(__file__))
+            candidates.append(os.path.join(here, "Models"))
+
+        # 2) Pick the first directory that actually exists
+        model_dir = None
+        for d in candidates:
+            if os.path.isdir(d):
+                model_dir = d
+                break
+
+        if model_dir is None:
+            raise FileNotFoundError(
+                f"Could not find 'Models' folder. Checked: {candidates}"
+            )
+
+        # 3) Map attribute names to filenames
         model_files = {
             "model_s_0": "2025_01_21_sphere_CPNN_Radius_0.keras",
             "model_s_1": "2025_01_21_sphere_CPNN_AspectRatio_0.keras",
@@ -860,19 +881,18 @@ class MainApplication(tk.Frame):
             "model_cl": "2025_01_26_SVM_C_0.pkl",
         }
 
-        # Load all Keras models
+        # 4) Load each model
         for attr, filename in model_files.items():
             full_path = os.path.join(model_dir, filename)
+            if not os.path.exists(full_path):
+                raise FileNotFoundError(f"Model file not found: {full_path}")
+
             if attr == "model_cl":
-                # pickle‐load the classifier
                 with open(full_path, "rb") as f:
                     setattr(self, attr, pk.load(f))
             else:
-                # Keras models
                 setattr(self, attr,
                         tf.keras.models.load_model(full_path, compile=False))
-
-        return None
 
     def _Pop_Up_0(self, *args, **kwargs) -> None:
 
