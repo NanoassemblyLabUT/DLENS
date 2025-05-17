@@ -8,7 +8,6 @@ on:
 
 jobs:
   build-arm64:
-    name: Build ARM64 macOS App
     runs-on: macos-latest
     strategy:
       matrix:
@@ -46,7 +45,7 @@ jobs:
             main.py
 
       - name: Upload ARM64 .app artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: D-LENS-arm64.app
           path: dist/D-LENS-arm64.app
