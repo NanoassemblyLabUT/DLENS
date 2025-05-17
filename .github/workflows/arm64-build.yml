@@ -3,8 +3,8 @@ name: Build D-LENS ARM64 macOS App
 on:
 push:
 branches:
-\- main
-workflow\_dispatch:
+- main
+workflow_dispatch:
 
 jobs:
 build-arm64:
@@ -12,13 +12,13 @@ name: Build ARM64 macOS App
 runs-on: macos-latest
 strategy:
 matrix:
-python-version: \["3.12"]
+python-version: ["3.12"]
 
 steps:
   - name: Checkout repository
     uses: actions/checkout@v3
 
-  - name: Set up Python ${{ matrix.python-version }}
+  - name: Set up Python
     uses: actions/setup-python@v5
     with:
       python-version: ${{ matrix.python-version }}
