@@ -16,7 +16,6 @@ steps:
 \- name: Checkout repository
 uses: actions/checkout\@v3
 
-```
   - name: Set up Python ${{ matrix.python-version }}
     uses: actions/setup-python@v5
     with:
@@ -50,4 +49,3 @@ uses: actions/checkout\@v3
     with:
       name: D-LENS-arm64.app
       path: dist/D-LENS-arm64.app
-```
