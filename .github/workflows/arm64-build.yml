@@ -45,7 +45,7 @@ jobs:
             main.py
 
       - name: Upload ARM64 .app artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: D-LENS-arm64.app
           path: dist/D-LENS-arm64.app
