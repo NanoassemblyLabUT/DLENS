@@ -2,7 +2,8 @@ name: Build D-LENS ARM64 macOS App
 
 on:
 push:
-branches: \[ main ]
+branches:
+\- main
 workflow\_dispatch:
 
 jobs:
@@ -11,10 +12,11 @@ name: Build ARM64 macOS App
 runs-on: macos-latest
 strategy:
 matrix:
-python-version: \[3.12]
+python-version: \["3.12"]
+
 steps:
-\- name: Checkout repository
-uses: actions/checkout\@v3
+  - name: Checkout repository
+    uses: actions/checkout@v3
 
   - name: Set up Python ${{ matrix.python-version }}
     uses: actions/setup-python@v5
@@ -26,7 +28,7 @@ uses: actions/checkout\@v3
     run: |
       python -m venv venv-arm
       source venv-arm/bin/activate
-      python -m pip install --upgrade pip
+      pip install --upgrade pip
 
   - name: Install dependencies
     run: |
