@@ -60,8 +60,6 @@ class MainApplication(tk.Frame):
         self._Layout()
         self._LoadModels()
 
-        return None
-
     def _Setting(self, *args, **kwargs) -> None:
 
         """
@@ -265,9 +263,14 @@ class MainApplication(tk.Frame):
         button_autosub.place(height=30, width=110, x=512, y=9 * dy)
         ToolTip(button_autosub, "Click to perform auto-subtraction")
 
+        button_smooth = Button(parent, text='Smoothen', command=self._Smoothen)
+        button_smooth.place(height=30, width=96, x=512, y=11 * dy)
+        ToolTip(button_smooth, "Click to smoothen data")
+
         button_help = Button(parent, text='Help', command=self._Help)
-        button_help.place(height=30, width=110, x=512, y=11 * dy)
+        button_help.place(height=30, width=110, x=512, y=13 * dy)
         ToolTip(button_help, "Click to access help")
+
         self.drop_methods = drop_methods
 
         self.select_shapes = select_shapes
@@ -1575,6 +1578,10 @@ class MainApplication(tk.Frame):
 
         return None
 
+    def _Smoothen(self) -> None:
+        self._Pop_Up_1()
+        return None
+
     def _Pop_Up_1(self, *args, **kwargs) -> None:
 
         self.pop = tk.Toplevel()
@@ -2294,7 +2301,8 @@ class MainApplication(tk.Frame):
 
         with open(log_path, 'a') as f:
             f.write(
-                f'{cwd},{origin},{file_path},{shape},{p_0},{p_1},{p_2},{p_3},{p_4},{p_5},{p_6},{p_7},{m_0},{m_1},{m_2},{s_0},{s_1},{s_2},{error},{r_g_0},{r_g_1},{comment}\n')
+                f'{cwd},{origin},{file_path},{shape},{p_0},{p_1},{p_2},{p_3},{p_4},{p_5},{p_6},{p_7},{m_0},{m_1},{m_2},{s_0},{s_1},{s_2},{error},{r_g_0},{r_g_1},{comment}\n'
+            )
 
         # 3
         target = os.path.join(self.working_dir, os.path.basename(self.file_path))
@@ -2308,7 +2316,7 @@ class MainApplication(tk.Frame):
 
         return None
 
-    def _Change(self, param: str, change: str, *args, **kwargs) -> None:
+    def _Change(self, param: int, change: int, *args, **kwargs) -> None:
 
         match param:
 
@@ -2324,7 +2332,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.1
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_0 += delta
                 self.entry_0.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2343,7 +2351,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.01
                     case _:
-                        pass
+                        delta = 0.0
 
                 if self._class == 0:
                     self.p_1 += delta
@@ -2372,7 +2380,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.01
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_2 += delta
                 self.entry_2.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2391,7 +2399,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.01
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_3 += delta
                 self.entry_3.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2410,7 +2418,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.000_1
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_4 += delta
                 self.entry_4.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2429,7 +2437,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.1
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_5 += delta
                 self.entry_5.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2448,7 +2456,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.01
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_6 += delta
                 self.entry_6.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2467,7 +2475,7 @@ class MainApplication(tk.Frame):
                     case 3:
                         delta = -0.01
                     case _:
-                        pass
+                        delta = 0.0
 
                 self.p_7 += delta
                 self.entry_7.config(state=tk.NORMAL, background="#FFFFFF", foreground="black")
@@ -2975,7 +2983,15 @@ class MainApplication(tk.Frame):
                 p = self.p_6
                 q = self.p_7
             case _:
-                pass
+                self.method = Disperse_Spheroid_Shell
+                R = self.p_0
+                epsilon = self.p_1
+                PDI = self.p_2
+                f_core = self.p_3
+                rho_delta = self.p_4
+                t = self.p_5
+                p = self.p_6
+                q = self.p_7
 
         self.s = self.method(
             R=R,
@@ -3546,7 +3562,7 @@ class MainApplication(tk.Frame):
             case 1:
                 cut = 1.0
             case _:
-                pass
+                cut = 1.3
 
         q_new = q_arr[qr <= cut]
         I_new = I_arr[qr <= cut]
