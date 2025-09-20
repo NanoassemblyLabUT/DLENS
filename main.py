@@ -846,6 +846,9 @@ class MainApplication(tk.Frame):
             # PyInstaller: first try the internal bundle
             candidates.append(os.path.join(sys._MEIPASS, "Models"))
 
+            # Check Models folder next to the exe
+            candidates.append(os.path.join(os.path.dirname(sys.executable), "Models"))
+
             # Next try a sibling Models folder next to the .app (or exe)
             # sys.executable → .../D-LENS.app/Contents/MacOS/D-LENS
             exe_path = sys.executable
@@ -3583,11 +3586,12 @@ class MainApplication(tk.Frame):
 
 
 def main(*args, **kwargs) -> int:
-    if getattr(sys, 'frozen', False):
+    # for running pyinstaller on macOS
+    #if getattr(sys, 'frozen', False):
         # Only when bundled with PyInstaller
-        log_path = os.path.expanduser("~/Desktop/dlens_log.txt")
-        sys.stdout = open(log_path, 'w')
-        sys.stderr = open(log_path, 'w')
+        #log_path = os.path.expanduser("~/Desktop/dlens_log.txt")
+        #sys.stdout = open(log_path, 'w')
+        #sys.stderr = open(log_path, 'w')
     root = tk.Tk()
     MainApplication(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
