@@ -1,5 +1,14 @@
 import os
 import sys
+
+# --- WINDOWS GUI SILENT CRASH FIX ---
+# Prevents tqdm and print() from crashing the app when the console is hidden
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+# ------------------------------------
+
 import shutil
 import multiprocessing
 
@@ -92,7 +101,6 @@ class MainApplication(LayoutMixin, ProbabilityWindowMixin, SubclassProbabilityWi
         return None
 
     def _AddDynamicWidgets(self) -> None:
-        # ---> FIX: Moved widgets to the empty bottom-right corner under the Help button
         self.brute_force_var = tk.BooleanVar(value=False)
         self.check_brute_force = tk.Checkbutton(self.parent, text="Auto-fit all subclasses (Slower)", variable=self.brute_force_var)
         self.check_brute_force.place(x=660, y=16.5 * self.dy)
